@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.jabref.logic.help.HelpFile;
@@ -35,8 +34,8 @@ public class GvkFetcher implements SearchBasedParserFetcher {
     }
 
     @Override
-    public Optional<HelpFile> getHelpPage() {
-        return Optional.of(HelpFile.FETCHER_GVK);
+    public HelpFile getHelpPage() {
+        return HelpFile.FETCHER_GVK;
     }
 
     private String getSearchQueryStringForComplexQuery(List<String> queryList) {

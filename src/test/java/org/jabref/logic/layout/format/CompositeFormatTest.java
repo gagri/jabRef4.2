@@ -2,9 +2,8 @@ package org.jabref.logic.layout.format;
 
 import org.jabref.logic.layout.LayoutFormatter;
 
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CompositeFormatTest {
 
@@ -16,7 +15,7 @@ public class CompositeFormatTest {
 
     @Test
     public void testArrayComposite() {
-        LayoutFormatter f = new CompositeFormat(new LayoutFormatter[]{fieldText -> fieldText + fieldText,
+        LayoutFormatter f = new CompositeFormat(new LayoutFormatter[] {fieldText -> fieldText + fieldText,
                 fieldText -> "A" + fieldText, fieldText -> "B" + fieldText});
 
         assertEquals("BAff", f.format("f"));
@@ -34,4 +33,5 @@ public class CompositeFormatTest {
         assertEquals(second.format(first.format("Sa Makridakis and Sa Ca Wheelwright and Va Ea McGee")),
                 f.format("Sa Makridakis and Sa Ca Wheelwright and Va Ea McGee"));
     }
+
 }

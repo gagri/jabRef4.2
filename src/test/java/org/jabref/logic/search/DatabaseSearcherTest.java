@@ -18,6 +18,7 @@ public class DatabaseSearcherTest {
 
     private BibDatabase database;
 
+
     @BeforeEach
     public void setUp() {
         database = new BibDatabase();

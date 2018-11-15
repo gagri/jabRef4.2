@@ -65,9 +65,4 @@ public class DiVATest {
     public void testInvalidIdentifier() {
         assertFalse(fetcher.isValidId("banana"));
     }
-
-    @Test
-    public void testEmptyId() throws Exception {
-        assertEquals(Optional.empty(), fetcher.performSearchById(""));
-    }
 }

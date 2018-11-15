@@ -2,7 +2,7 @@ package org.jabref.logic.citationstyle;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URI;
+import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -13,10 +13,12 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,7 +26,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.jabref.logic.util.StandardFileType;
+import org.jabref.logic.util.FileType;
 
 import de.undercouch.citeproc.helper.CSLUtils;
 import org.slf4j.Logger;
@@ -37,13 +39,15 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * Representation of a CitationStyle. Stores its name, the file path and the style itself
+ * Representation of a CitationStyle.
+ * Stores its name, the file path and the style itself
  */
 public class CitationStyle {
 
     public static final String DEFAULT = "/ieee.csl";
     private static final Logger LOGGER = LoggerFactory.getLogger(CitationStyle.class);
-    private static final String STYLES_ROOT = "/csl-styles";
+
+    private static final Pattern SNAPSHOT_NAME = Pattern.compile(".*styles-1\\.0\\.1-SNAPSHOT\\.jar");
 
     private static final List<CitationStyle> STYLES = new ArrayList<>();
 
@@ -84,7 +88,7 @@ public class CitationStyle {
     private static String stripInvalidProlog(String source) {
         int startIndex = source.indexOf("<");
         if (startIndex > 0) {
-            return source.substring(startIndex);
+            return source.substring(startIndex, source.length());
         } else {
             return source;
         }
@@ -95,13 +99,13 @@ public class CitationStyle {
      */
     public static Optional<CitationStyle> createCitationStyleFromFile(final String styleFile) {
         if (!isCitationStyleFile(styleFile)) {
-            LOGGER.error("Can only load style files: {}", styleFile);
+            LOGGER.error("Can only load style files: " + styleFile);
             return Optional.empty();
         }
 
         try {
             String text;
-            String internalFile = STYLES_ROOT + (styleFile.startsWith("/") ? "" : "/") + styleFile;
+            String internalFile = (styleFile.startsWith("/") ? "" : "/") + styleFile;
             URL url = CitationStyle.class.getResource(internalFile);
             if (url != null) {
                 text = CSLUtils.readURLToString(url, StandardCharsets.UTF_8.toString());
@@ -136,44 +140,43 @@ public class CitationStyle {
         if (!STYLES.isEmpty()) {
             return STYLES;
         }
-
-        URL url = CitationStyle.class.getResource(STYLES_ROOT);
-        if (url == null) {
-            return Collections.emptyList();
-        }
         try {
-            URI uri = url.toURI();
-            if ("jar".equals(uri.getScheme())) {
-                try (FileSystem fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
-                    Path path = fs.getPath(STYLES_ROOT);
-                    STYLES.addAll(discoverCitationStylesInPath(path));
+
+            Path filePath = Paths.get(CitationStyle.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            String path = filePath.toString();
+
+            // This is a quick fix to have the styles when running JabRef in a development environment.
+            // The styles.jar is not extracted into the JabRef.jar and therefore, we search the classpath for it.
+            if (Files.isDirectory(filePath)) {
+                final String cp = System.getProperty("java.class.path");
+                final String[] entries = cp.split(System.getProperty("path.separator"));
+
+                Optional<String> foundStyle = Arrays.stream(entries).filter(entry -> SNAPSHOT_NAME.matcher(entry).matches()).findFirst();
+                path = foundStyle.orElse(path);
+            }
+
+            try (FileSystem jarFs = FileSystems.newFileSystem(Paths.get(path), null)) {
+
+                try (Stream<Path> stylefileStream = Files.find(jarFs.getRootDirectories().iterator().next(), 1, (file, attr) -> file.toString().endsWith("csl"))) {
+                    for (Path style : stylefileStream.collect(Collectors.toList())) {
+                        CitationStyle.createCitationStyleFromFile(style.getFileName().toString()).ifPresent(STYLES::add);
+                    }
+                } catch (UncheckedIOException e) {
+                    throw new IOException(e);
                 }
-            } else {
-                STYLES.addAll(discoverCitationStylesInPath(Paths.get(uri)));
             }
             return STYLES;
-        } catch (URISyntaxException | IOException e) {
-            LOGGER.error("something went wrong while searching available CitationStyles. Are you running directly from source code?", e);
-            return Collections.emptyList();
+        } catch (UncheckedIOException | IOException | URISyntaxException ex) {
+            LOGGER.error("something went wrong while searching available CitationStyles. Are you running directly from source code?", ex);
         }
-    }
-
-    private static List<CitationStyle> discoverCitationStylesInPath(Path path) throws IOException {
-        try (Stream<Path> stream = Files.find(path, 1, (file, attr) -> file.toString().endsWith("csl"))) {
-            return stream.map(Path::getFileName)
-                         .map(Path::toString)
-                         .map(CitationStyle::createCitationStyleFromFile)
-                         .filter(Optional::isPresent)
-                         .map(Optional::get)
-                         .collect(Collectors.toList());
-        }
+        return Collections.emptyList();
     }
 
     /**
      * Checks if the given style file is a CitationStyle
      */
     public static boolean isCitationStyleFile(String styleFile) {
-        return StandardFileType.CITATION_STYLE.getExtensions().stream().anyMatch(styleFile::endsWith);
+        return FileType.CITATION_STYLE.getExtensions().stream().anyMatch(styleFile::endsWith);
     }
 
     public String getTitle() {

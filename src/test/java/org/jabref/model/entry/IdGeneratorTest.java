@@ -17,5 +17,7 @@ public class IdGeneratorTest {
             assertFalse(set.contains(string));
             set.add(string);
         }
+
     }
+
 }

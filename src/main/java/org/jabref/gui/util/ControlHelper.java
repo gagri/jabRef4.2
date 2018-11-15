@@ -1,59 +1,40 @@
 package org.jabref.gui.util;
 
-import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
+import java.io.IOException;
 
-import javax.swing.JComponent;
-
-import javafx.embed.swing.SwingNode;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.TextFormatter;
+
+import org.jabref.gui.AbstractView;
+import org.jabref.logic.l10n.Localization;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ControlHelper {
-
-    public static void setAction(ButtonType buttonType, DialogPane dialogPane, Consumer<Event> consumer) {
-        Button button = (Button) dialogPane.lookupButton(buttonType);
-        button.addEventFilter(ActionEvent.ACTION, (event -> {
-            consumer.accept(event);
-            event.consume();
-        }));
-    }
-
-    public static void setSwingContent(DialogPane dialogPane, JComponent content) {
-        SwingNode node = new SwingNode();
-        node.setContent(content);
-        node.setVisible(true);
-        dialogPane.setContent(node);
-    }
-
-    public static boolean childIsFocused(Parent node) {
-        return node.isFocused() || node.getChildrenUnmodifiable().stream().anyMatch(child -> {
-            if (child instanceof Parent) {
-                return childIsFocused((Parent) child);
-            } else {
-                return child.isFocused();
-            }
-        });
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(ControlHelper.class);
 
     /**
-     * Returns a text formatter that restricts input to integers
+     * Loads the FXML file associated to the passed control.
+     * The FMXL file should have the same name as the control with ending ".fxml" appended
      */
-    public static TextFormatter<String> getIntegerTextFormatter() {
-        UnaryOperator<TextFormatter.Change> filter = change -> {
-            String text = change.getText();
+    public static void loadFXMLForControl(Parent control) {
+        Class<?> clazz = control.getClass();
+        String clazzName = clazz.getSimpleName();
 
-            if (text.matches("[0-9]*")) {
-                return change;
-            }
+        FXMLLoader fxmlLoader = new FXMLLoader(clazz.getResource(clazzName + ".fxml"), Localization.getMessages());
+        fxmlLoader.setController(control);
+        fxmlLoader.setRoot(control);
+        try {
+            fxmlLoader.load();
 
-            return null;
-        };
-        return new TextFormatter<>(filter);
+            // Add our base css file
+            control.getStylesheets().add(0, AbstractView.class.getResource("Main.css").toExternalForm());
+
+            // Add language resource
+
+        } catch (IOException exception) {
+            LOGGER.error("Problem loading fxml for control", exception);
+        }
     }
 }

@@ -54,6 +54,7 @@ public class BibtexNameFormatterTest {
         assertNameFormatB("P.~{\\'E}. Victor", "Paul {\\'E}mile Victor and and de la Cierva y Codorn{\\’\\i}u, Juan");
         assertNameFormatC("Paul~{\\'E}mile Victor",
                 "Paul {\\'E}mile Victor and and de la Cierva y Codorn{\\’\\i}u, Juan");
+
     }
 
     private void assertNameFormat(String string, String string2, int which, String format) {
@@ -113,4 +114,5 @@ public class BibtexNameFormatterTest {
         assertEquals(8, BibtexNameFormatter.numberOfChars("Vall{e}e", -1));
         assertEquals(6, BibtexNameFormatter.numberOfChars("Vall{\\'e this will be skipped}e", -1));
     }
+
 }

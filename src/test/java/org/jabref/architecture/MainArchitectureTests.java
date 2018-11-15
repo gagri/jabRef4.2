@@ -39,7 +39,7 @@ public class MainArchitectureTests {
     private static Map<String, List<String>> exceptions;
 
     @BeforeAll
-    static void setUp() {
+    public static void setUp() {
         exceptions = new HashMap<>();
         // Add exceptions for the architectural test here
         // Note that bending the architectural constraints should not be done inconsiderately
@@ -61,7 +61,7 @@ public class MainArchitectureTests {
         exceptions.put(PACKAGE_ORG_JABREF_MODEL, modelExceptions);
     }
 
-    private static Stream<Arguments> getPackages() {
+    public static Stream<Arguments> getPackages() {
 
         return Stream.of(
                 Arguments.of(PACKAGE_ORG_JABREF_LOGIC, PACKAGE_JAVA_AWT),
@@ -80,12 +80,12 @@ public class MainArchitectureTests {
 
     @ParameterizedTest(name = "{index} -- is {0} independent of {1}?")
     @MethodSource("getPackages")
-    void firstPackageIsIndependentOfSecondPackage(String firstPackage, String secondPackage) throws IOException {
+    public void firstPackageIsIndependentOfSecondPackage(String firstPackage, String secondPackage) throws IOException {
         Predicate<String> isExceptionPackage = (s) -> (s.startsWith("import " + secondPackage)
                 || s.startsWith("import static " + secondPackage))
                 && exceptions.getOrDefault(firstPackage, Collections.emptyList())
-                             .stream()
-                             .noneMatch(exception -> s.startsWith("import " + exception));
+                        .stream()
+                        .noneMatch(exception -> s.startsWith("import " + exception));
 
         Predicate<String> isPackage = (s) -> s.startsWith("package " + firstPackage);
 

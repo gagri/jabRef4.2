@@ -4,20 +4,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.jabref.logic.layout.LayoutFormatterPreferences;
 import org.jabref.model.FieldChange;
 import org.jabref.model.cleanup.CleanupJob;
 import org.jabref.model.database.BibDatabaseContext;
 import org.jabref.model.entry.BibEntry;
-import org.jabref.model.metadata.FilePreferences;
+import org.jabref.model.metadata.FileDirectoryPreferences;
 
 public class CleanupWorker {
 
     private final BibDatabaseContext databaseContext;
-    private final FilePreferences filePreferences;
+    private final String fileNamePattern;
+    private final String fileDirPattern;
+    private final LayoutFormatterPreferences layoutPrefs;
+    private final FileDirectoryPreferences fileDirectoryPreferences;
+    private int unsuccessfulRenames;
+
 
     public CleanupWorker(BibDatabaseContext databaseContext, CleanupPreferences cleanupPreferences) {
         this.databaseContext = databaseContext;
-        this.filePreferences = cleanupPreferences.getFilePreferences();
+        this.fileNamePattern = cleanupPreferences.getFileNamePattern();
+        this.fileDirPattern = cleanupPreferences.getFileDirPattern();
+        this.layoutPrefs = cleanupPreferences.getLayoutFormatterPreferences();
+        this.fileDirectoryPreferences = cleanupPreferences.getFileDirectoryPreferences();
+    }
+
+    public int getUnsuccessfulRenames() {
+        return unsuccessfulRenames;
     }
 
     public List<FieldChange> cleanup(CleanupPreset preset, BibEntry entry) {
@@ -37,43 +50,40 @@ public class CleanupWorker {
     private List<CleanupJob> determineCleanupActions(CleanupPreset preset) {
         List<CleanupJob> jobs = new ArrayList<>();
 
-        for (CleanupPreset.CleanupStep action : preset.getActiveJobs()) {
-            jobs.add(toJob(action));
+        if (preset.isConvertToBiblatex()) {
+            jobs.add(new ConvertToBiblatexCleanup());
         }
-
+        if (preset.isConvertToBibtex()) {
+            jobs.add(new ConvertToBibtexCleanup());
+        }
         if (preset.getFormatterCleanups().isEnabled()) {
             jobs.addAll(preset.getFormatterCleanups().getConfiguredActions());
         }
+        if (preset.isCleanUpUpgradeExternalLinks()) {
+            jobs.add(new UpgradePdfPsToFileCleanup());
+        }
+        if (preset.isCleanUpDOI()) {
+            jobs.add(new DoiCleanup());
+        }
+        if (preset.isCleanUpISSN()) {
+            jobs.add(new ISSNCleanup());
+        }
+        if (preset.isFixFileLinks()) {
+            jobs.add(new FileLinksCleanup());
+        }
+        if (preset.isMovePDF()) {
+            jobs.add(new MoveFilesCleanup(databaseContext, fileDirPattern, fileDirectoryPreferences, layoutPrefs));
+        }
+        if (preset.isMakePathsRelative()) {
+            jobs.add(new RelativePathsCleanup(databaseContext, fileDirectoryPreferences));
+        }
+        if (preset.isRenamePDF()) {
+            RenamePdfCleanup cleaner = new RenamePdfCleanup(preset.isRenamePdfOnlyRelativePaths(), databaseContext,
+                    fileNamePattern, layoutPrefs, fileDirectoryPreferences);
+            jobs.add(cleaner);
+            unsuccessfulRenames += cleaner.getUnsuccessfulRenames();
+        }
 
         return jobs;
-    }
-
-    private CleanupJob toJob(CleanupPreset.CleanupStep action) {
-        switch (action) {
-            case CLEAN_UP_DOI:
-                return new DoiCleanup();
-            case CLEANUP_EPRINT:
-                return new EprintCleanup();
-            case MAKE_PATHS_RELATIVE:
-                return new RelativePathsCleanup(databaseContext, filePreferences);
-            case RENAME_PDF:
-                return new RenamePdfCleanup(false, databaseContext, filePreferences);
-            case RENAME_PDF_ONLY_RELATIVE_PATHS:
-                return new RenamePdfCleanup(true, databaseContext, filePreferences);
-            case CLEAN_UP_UPGRADE_EXTERNAL_LINKS:
-                return new UpgradePdfPsToFileCleanup();
-            case CONVERT_TO_BIBLATEX:
-                return new ConvertToBiblatexCleanup();
-            case CONVERT_TO_BIBTEX:
-                return new ConvertToBibtexCleanup();
-            case MOVE_PDF:
-                return new MoveFilesCleanup(databaseContext, filePreferences);
-            case FIX_FILE_LINKS:
-                return new FileLinksCleanup();
-            case CLEAN_UP_ISSN:
-                return new ISSNCleanup();
-            default:
-                throw new UnsupportedOperationException(action.name());
-        }
     }
 }

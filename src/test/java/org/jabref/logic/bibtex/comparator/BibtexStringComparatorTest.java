@@ -12,6 +12,7 @@ public class BibtexStringComparatorTest {
     private final BibtexStringComparator bsc1 = new BibtexStringComparator(false);
     private final BibtexStringComparator bsc2 = new BibtexStringComparator(true);
 
+
     @Test
     public void test() {
         BibtexString bs1 = new BibtexString("VLSI", "Very Large Scale Integration");
@@ -41,5 +42,7 @@ public class BibtexStringComparatorTest {
         // bs4 after bs1 if considering that bs4 contains bs1
         assertTrue(bsc2.compare(bs1, bs4) < 0);
         assertTrue(bsc2.compare(bs4, bs1) > 0);
+
     }
+
 }

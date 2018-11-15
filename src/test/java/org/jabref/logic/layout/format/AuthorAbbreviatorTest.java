@@ -2,9 +2,8 @@ package org.jabref.logic.layout.format;
 
 import org.jabref.logic.layout.LayoutFormatter;
 
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Is the save as the AuthorLastFirstAbbreviator.
@@ -22,5 +21,7 @@ public class AuthorAbbreviatorTest {
         assertEquals(b.format("Smith, John"), a.format("Smith, John"));
         assertEquals(b.format("von Neumann, John and Smith, John and Black Brown, Peter"), a
                 .format("von Neumann, John and Smith, John and Black Brown, Peter"));
+
     }
+
 }

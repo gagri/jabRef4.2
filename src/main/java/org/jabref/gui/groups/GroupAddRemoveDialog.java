@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,7 +14,6 @@ import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
@@ -57,10 +55,10 @@ public class GroupAddRemoveDialog implements BaseAction {
 
         selection = panel.getSelectedEntries();
 
-        final JDialog diag = new JDialog((JFrame) null,
-                                         (add ? (move ? Localization.lang("Move to group") : Localization.lang("Add to group")) : Localization
-                                                                                                                                              .lang("Remove from group")),
-                                         true);
+        final JDialog diag = new JDialog(panel.frame(),
+                (add ? (move ? Localization.lang("Move to group") : Localization.lang("Add to group")) : Localization
+                        .lang("Remove from group")),
+                true);
         JButton ok = new JButton(Localization.lang("OK"));
         JButton cancel = new JButton(Localization.lang("Cancel"));
         tree = new JTree(new GroupTreeNodeViewModel(groups.get()));
@@ -110,7 +108,7 @@ public class GroupAddRemoveDialog implements BaseAction {
         // Key bindings:
         ActionMap am = sp.getActionMap();
         InputMap im = sp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        im.put(Globals.getKeyPrefs().getKey(KeyBinding.CLOSE), "close");
+        im.put(Globals.getKeyPrefs().getKey(KeyBinding.CLOSE_DIALOG), "close");
         am.put("close", new AbstractAction() {
 
             @Override
@@ -123,6 +121,7 @@ public class GroupAddRemoveDialog implements BaseAction {
 
         diag.getContentPane().add(bb.getPanel(), BorderLayout.SOUTH);
         diag.pack();
+        diag.setLocationRelativeTo(panel.frame());
         diag.setVisible(true);
 
     }
@@ -167,9 +166,7 @@ public class GroupAddRemoveDialog implements BaseAction {
             GroupTreeNodeViewModel node = (GroupTreeNodeViewModel) path.getLastPathComponent();
             if (checkGroupEnable(node)) {
 
-                //we need to copy the contents of the observable list here, because when removeFromEntries is called,
-                //probably the focus changes to the first entry in the all entries group and thus getSelectedEntries() no longer contains our entry we want to move
-                List<BibEntry> entries = new ArrayList<>(Globals.stateManager.getSelectedEntries());
+                List<BibEntry> entries = Globals.stateManager.getSelectedEntries();
 
                 if (move) {
                     recuriveRemoveFromNode((GroupTreeNodeViewModel) tree.getModel().getRoot(), entries);
@@ -178,7 +175,7 @@ public class GroupAddRemoveDialog implements BaseAction {
                 if (add) {
                     node.addEntriesToGroup(entries);
                 } else {
-                    node.removeEntriesFromGroup(entries);
+                    node.removeEntriesFromGroup(Globals.stateManager.getSelectedEntries());
                 }
 
                 return true;
@@ -190,7 +187,7 @@ public class GroupAddRemoveDialog implements BaseAction {
 
     private void recuriveRemoveFromNode(GroupTreeNodeViewModel node, List<BibEntry> entries) {
         node.removeEntriesFromGroup(entries);
-        for (GroupTreeNodeViewModel child : node.getChildren()) {
+        for (GroupTreeNodeViewModel child: node.getChildren()) {
             recuriveRemoveFromNode(child, entries);
         }
     }
@@ -210,7 +207,7 @@ public class GroupAddRemoveDialog implements BaseAction {
 
         @Override
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded,
-                                                      boolean leaf, int row, boolean hasFocus) {
+                boolean leaf, int row, boolean hasFocus) {
             Component c = super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
 
             GroupTreeNodeViewModel node = (GroupTreeNodeViewModel) value;

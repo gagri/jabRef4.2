@@ -8,61 +8,91 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class LocalizationTest {
+public class LocalizationTest {
 
     private Locale locale;
 
     @BeforeEach
-    void storeDefaultLocale() {
+    public void storeDefaultLocale() {
         locale = Locale.getDefault();
     }
 
     @AfterEach
-    void restoreDefaultLocale() {
+    public void restoreDefaultLocale() {
         Locale.setDefault(locale);
         javax.swing.JComponent.setDefaultLocale(locale);
-        Localization.setLanguage(Language.English);
+        Localization.setLanguage("en");
     }
 
     @Test
-    void testSetKnownLanguage() {
+    public void testSetKnownLanguage() {
         Locale.setDefault(Locale.CHINA);
-        Localization.setLanguage(Language.English);
+        Localization.setLanguage("en");
         assertEquals("en", Locale.getDefault().toString());
     }
 
     @Test
-    void testKnownTranslationWithGroups() {
-        Localization.setLanguage(Language.English);
-        assertEquals("Groups", Localization.lang("Groups"));
+    public void testSetUnknownLanguage() {
+        Locale.setDefault(Locale.CHINA);
+        Localization.setLanguage("WHATEVER");
+        assertEquals("en", Locale.getDefault().toString());
     }
 
     @Test
-    void testKnownEnglishTranslationOfUndo() {
-        Localization.setLanguage(Language.English);
-        assertEquals("Undo", Localization.lang("Undo"));
+    public void testKnownTranslationWithGroups() {
+        Localization.setLanguage("en");
+        String knownKey = "Groups";
+        assertEquals(knownKey, Localization.lang(knownKey));
+        String knownValueWithMnemonics = "&Groups";
+        assertEquals(knownValueWithMnemonics, Localization.menuTitle(knownKey));
     }
 
     @Test
-    void testKnownGermanTranslation() {
-        Localization.setLanguage(Language.German);
-        assertEquals("Zeige Einstellungen", Localization.lang("Show preferences"));
+    public void testKnownEnglishTranslationOfUndo() {
+        Localization.setLanguage("en");
+        String knownKey = "Undo";
+        assertEquals(knownKey, Localization.lang(knownKey));
+        String knownValueWithMnemonics = "&Undo";
+        assertEquals(knownValueWithMnemonics, Localization.menuTitle(knownKey));
     }
 
     @Test
-    void testKnownTranslationWithCountryModifier() {
-        Localization.setLanguage(Language.BrazilianPortuguese);
-        assertEquals("Grupos", Localization.lang("Groups"));
+    public void testKnownGermanTranslationDoesNotHaveAmpersand() {
+        Localization.setLanguage("de");
+        assertEquals("Alle speichern", Localization.lang("Save all"));
     }
 
     @Test
-    void testUnknownTranslation() {
-        Localization.setLanguage(Language.English);
-        assertEquals("WHATEVER", Localization.lang("WHATEVER"));
+    public void testKnownGermanTranslation() {
+        Localization.setLanguage("de");
+        String knownKey = "Save all";
+        assertEquals("Alle speichern", Localization.lang(knownKey));
+        assertEquals("A&lle speichern", Localization.menuTitle(knownKey));
     }
 
     @Test
-    void testUnsetLanguageTranslation() {
-        assertEquals("Groups", Localization.lang("Groups"));
+    public void testKnownTranslationWithCountryModifier() {
+        Localization.setLanguage("en_US");
+        String knownKey = "Groups";
+        assertEquals(knownKey, Localization.lang(knownKey));
+        String knownValueWithMnemonics = "&Groups";
+        assertEquals(knownValueWithMnemonics, Localization.menuTitle(knownKey));
     }
+
+    @Test
+    public void testUnknownTranslation() {
+        Localization.setLanguage("en");
+        String knownKey = "WHATEVER";
+        assertEquals(knownKey, Localization.lang(knownKey));
+        assertEquals(knownKey, Localization.menuTitle(knownKey));
+    }
+
+    @Test
+    public void testUnsetLanguageTranslation() {
+        String knownKey = "Groups";
+        assertEquals(knownKey, Localization.lang(knownKey));
+        String knownValueWithMnemonics = "&Groups";
+        assertEquals(knownValueWithMnemonics, Localization.menuTitle(knownKey));
+    }
+
 }

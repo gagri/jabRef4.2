@@ -4,6 +4,7 @@ import java.awt.Desktop;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +12,7 @@ import java.util.List;
 import org.jabref.Globals;
 import org.jabref.gui.BasePanel;
 import org.jabref.gui.JabRefFrame;
-import org.jabref.gui.actions.BaseAction;
 import org.jabref.gui.desktop.JabRefDesktop;
-import org.jabref.gui.util.BackgroundTask;
 import org.jabref.logic.bibtex.BibEntryWriter;
 import org.jabref.logic.bibtex.LatexFieldFormatter;
 import org.jabref.logic.l10n.Localization;
@@ -34,38 +33,31 @@ import org.slf4j.LoggerFactory;
  * are opened. This feature is disabled by default and can be switched on at
  * preferences/external programs
  */
-public class SendAsEMailAction implements BaseAction {
+public class SendAsEMailAction extends AbstractWorker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SendAsEMailAction.class);
     private final JabRefFrame frame;
+    private String message;
+
 
     public SendAsEMailAction(JabRefFrame frame) {
         this.frame = frame;
     }
 
     @Override
-    public void action() {
-        BackgroundTask.wrap(this::sendEmail)
-                      .onSuccess(frame::output)
-                      .onFailure(e -> {
-                          String message = Localization.lang("Error creating email");
-                          LOGGER.warn(message, e);
-                          frame.output(message);
-                      })
-                      .executeWith(Globals.TASK_EXECUTOR);
-    }
-
-    private String sendEmail() throws Exception {
+    public void run() {
         if (!Desktop.isDesktopSupported()) {
-            return Localization.lang("Error creating email");
+            message = Localization.lang("Error creating email");
+            return;
         }
 
         BasePanel panel = frame.getCurrentBasePanel();
         if (panel == null) {
-            throw new IllegalStateException("Base panel is not available.");
+            return;
         }
         if (panel.getSelectedEntries().isEmpty()) {
-            return Localization.lang("This operation requires one or more entries to be selected.");
+            message = Localization.lang("This operation requires one or more entries to be selected.");
+            return;
         }
 
         StringWriter sw = new StringWriter();
@@ -90,7 +82,7 @@ public class SendAsEMailAction implements BaseAction {
         boolean openFolders = JabRefPreferences.getInstance().getBoolean(JabRefPreferences.OPEN_FOLDERS_OF_ATTACHED_FILES);
 
         List<Path> fileList = FileUtil.getListOfLinkedFiles(bes, frame.getCurrentBasePanel().getBibDatabaseContext()
-                                                                      .getFileDirectoriesAsPaths(Globals.prefs.getFilePreferences()));
+                .getFileDirectoriesAsPaths(Globals.prefs.getFileDirectoryPreferences()));
         for (Path f : fileList) {
             attachments.add(f.toAbsolutePath().toString());
             if (openFolders) {
@@ -110,11 +102,30 @@ public class SendAsEMailAction implements BaseAction {
             mailTo = mailTo.concat("\"");
         }
 
-        URI uriMailTo = new URI("mailto", mailTo, null);
+        URI uriMailTo;
+        try {
+            uriMailTo = new URI("mailto", mailTo, null);
+        } catch (URISyntaxException e1) {
+            message = Localization.lang("Error creating email");
+            LOGGER.warn(message, e1);
+            return;
+        }
 
         Desktop desktop = Desktop.getDesktop();
-        desktop.mail(uriMailTo);
+        try {
+            desktop.mail(uriMailTo);
+        } catch (IOException e) {
+            message = Localization.lang("Error creating email");
+            LOGGER.warn(message, e);
+            return;
+        }
 
-        return String.format("%s: %d", Localization.lang("Entries added to an email"), bes.size());
+        message = String.format("%s: %d", Localization.lang("Entries added to an email"), bes.size());
     }
+
+    @Override
+    public void update() {
+        frame.output(message);
+    }
+
 }

@@ -18,7 +18,7 @@ import org.jabref.logic.importer.Importer;
 import org.jabref.logic.importer.ParserResult;
 import org.jabref.logic.importer.fetcher.DoiFetcher;
 import org.jabref.logic.l10n.Localization;
-import org.jabref.logic.util.StandardFileType;
+import org.jabref.logic.util.FileType;
 import org.jabref.logic.xmp.EncryptedPdfsNotSupportedException;
 import org.jabref.logic.xmp.XmpUtilReader;
 import org.jabref.model.entry.BibEntry;
@@ -45,14 +45,13 @@ public class PdfContentImporter extends Importer {
     // input lines into several lines
     private String[] lines;
     // current index in lines
-    private int lineIndex;
+    private int i;
     private String curString;
     private String year;
 
 
     public PdfContentImporter(ImportFormatPreferences importFormatPreferences) {
         this.importFormatPreferences = importFormatPreferences;
-
     }
     /**
      * Removes all non-letter characters at the end
@@ -226,19 +225,17 @@ public class PdfContentImporter extends Importer {
             //   the different lines are joined into one and thereby separated by " "
             lines = firstPageContents.split(System.lineSeparator());
 
-            lineIndex = 0; //to prevent array index out of bounds exception on second run we need to reset i to zero
-
             proceedToNextNonEmptyLine();
-            if (lineIndex >= lines.length) {
+            if (i >= lines.length) {
                 // PDF could not be parsed or is empty
                 // return empty list
                 return new ParserResult();
             }
 
             // we start at the current line
-            curString = lines[lineIndex];
+            curString = lines[i];
             // i might get incremented later and curString modified, too
-            lineIndex = lineIndex + 1;
+            i = i + 1;
 
             String author;
             String editor = null;
@@ -282,10 +279,10 @@ public class PdfContentImporter extends Importer {
 
             // after title: authors
             author = null;
-            while ((lineIndex < lines.length) && !"".equals(lines[lineIndex])) {
+            while ((i < lines.length) && !"".equals(lines[i])) {
                 // author names are unlikely to be lines among different lines
                 // treat them line by line
-                curString = streamlineNames(lines[lineIndex]);
+                curString = streamlineNames(lines[i]);
                 if (author == null) {
                     author = curString;
                 } else {
@@ -295,14 +292,14 @@ public class PdfContentImporter extends Importer {
                         author = author.concat(" and ").concat(curString);
                     }
                 }
-                lineIndex++;
+                i++;
             }
             curString = "";
-            lineIndex++;
+            i++;
 
             // then, abstract and keywords follow
-            while (lineIndex < lines.length) {
-                curString = lines[lineIndex];
+            while (i < lines.length) {
+                curString = lines[i];
                 if ((curString.length() >= "Abstract".length()) && "Abstract".equalsIgnoreCase(curString.substring(0, "Abstract".length()))) {
                     if (curString.length() == "Abstract".length()) {
                         // only word "abstract" found -- skip line
@@ -310,15 +307,15 @@ public class PdfContentImporter extends Importer {
                     } else {
                         curString = curString.substring("Abstract".length() + 1).trim().concat(System.lineSeparator());
                     }
-                    lineIndex++;
+                    i++;
                     // fillCurStringWithNonEmptyLines() cannot be used as that uses " " as line separator
                     // whereas we need linebreak as separator
-                    while ((lineIndex < lines.length) && !"".equals(lines[lineIndex])) {
-                        curString = curString.concat(lines[lineIndex]).concat(System.lineSeparator());
-                        lineIndex++;
+                    while ((i < lines.length) && !"".equals(lines[i])) {
+                        curString = curString.concat(lines[i]).concat(System.lineSeparator());
+                        i++;
                     }
                     abstractT = curString.trim();
-                    lineIndex++;
+                    i++;
                 } else if ((curString.length() >= "Keywords".length()) && "Keywords".equalsIgnoreCase(curString.substring(0, "Keywords".length()))) {
                     if (curString.length() == "Keywords".length()) {
                         // only word "Keywords" found -- skip line
@@ -326,7 +323,7 @@ public class PdfContentImporter extends Importer {
                     } else {
                         curString = curString.substring("Keywords".length() + 1).trim();
                     }
-                    lineIndex++;
+                    i++;
                     fillCurStringWithNonEmptyLines();
                     keywords = removeNonLettersAtEnd(curString);
                 } else {
@@ -343,18 +340,18 @@ public class PdfContentImporter extends Importer {
                         }
                     }
 
-                    lineIndex++;
+                    i++;
                     proceedToNextNonEmptyLine();
                 }
             }
 
-            lineIndex = lines.length - 1;
+            i = lines.length - 1;
 
             // last block: DOI, detailed information
             // sometimes, this information is in the third last block etc...
             // therefore, read until the beginning of the file
 
-            while (lineIndex >= 0) {
+            while (i >= 0) {
                 readLastBlock();
                 // i now points to the block before or is -1
                 // curString contains the last block, separated by " "
@@ -525,8 +522,8 @@ public class PdfContentImporter extends Importer {
      * proceed to next non-empty line
      */
     private void proceedToNextNonEmptyLine() {
-        while ((lineIndex < lines.length) && "".equals(lines[lineIndex].trim())) {
-            lineIndex++;
+        while ((i < lines.length) && "".equals(lines[i].trim())) {
+            i++;
         }
     }
 
@@ -543,16 +540,16 @@ public class PdfContentImporter extends Importer {
     private void fillCurStringWithNonEmptyLines() {
         // ensure that curString does not end with " "
         curString = curString.trim();
-        while ((lineIndex < lines.length) && !"".equals(lines[lineIndex])) {
-            String curLine = lines[lineIndex].trim();
+        while ((i < lines.length) && !"".equals(lines[i])) {
+            String curLine = lines[i].trim();
             if (!"".equals(curLine)) {
                 if (!curString.isEmpty()) {
                     // insert separating space if necessary
                     curString = curString.concat(" ");
                 }
-                curString = curString.concat(lines[lineIndex]);
+                curString = curString.concat(lines[i]);
             }
-            lineIndex++;
+            i++;
         }
 
         proceedToNextNonEmptyLine();
@@ -566,22 +563,22 @@ public class PdfContentImporter extends Importer {
      * invariant before/after: i points to line before the last handled block
      */
     private void readLastBlock() {
-        while ((lineIndex >= 0) && "".equals(lines[lineIndex].trim())) {
-            lineIndex--;
+        while ((i >= 0) && "".equals(lines[i].trim())) {
+            i--;
         }
         // i is now at the end of a block
 
-        int end = lineIndex;
+        int end = i;
 
         // find beginning
-        while ((lineIndex >= 0) && !"".equals(lines[lineIndex])) {
-            lineIndex--;
+        while ((i >= 0) && !"".equals(lines[i])) {
+            i--;
         }
         // i is now the line before the beginning of the block
         // this fulfills the invariant
 
         curString = "";
-        for (int j = lineIndex + 1; j <= end; j++) {
+        for (int j = i + 1; j <= end; j++) {
             curString = curString.concat(lines[j].trim());
             if (j != end) {
                 curString = curString.concat(" ");
@@ -595,8 +592,8 @@ public class PdfContentImporter extends Importer {
     }
 
     @Override
-    public StandardFileType getFileType() {
-        return StandardFileType.PDF;
+    public FileType getFileType() {
+        return FileType.PDF_CONTENT;
     }
 
     @Override

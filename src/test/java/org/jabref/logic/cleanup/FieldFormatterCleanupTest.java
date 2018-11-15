@@ -3,7 +3,6 @@ package org.jabref.logic.cleanup;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jabref.logic.formatter.bibtexfields.UnicodeToLatexFormatter;
 import org.jabref.logic.formatter.casechanger.UpperCaseFormatter;
 import org.jabref.model.cleanup.FieldFormatterCleanup;
 import org.jabref.model.entry.BibEntry;
@@ -34,6 +33,7 @@ public class FieldFormatterCleanupTest {
         fieldMap.put("doi", "jabrefdoi");
         fieldMap.put("issn", "jabrefissn");
         entry.setField(fieldMap);
+
     }
 
     @Test
@@ -62,32 +62,5 @@ public class FieldFormatterCleanupTest {
         assertEquals(fieldMap.get("abstract").toUpperCase(), entry.getField("abstract").get());
         assertEquals(fieldMap.get("doi"), entry.getField("doi").get());
         assertEquals(fieldMap.get("issn"), entry.getField("issn").get());
-    }
-
-    @Test
-    public void testCleanupAllFieldsIgnoresKeyField() throws Exception {
-        FieldFormatterCleanup cleanup = new FieldFormatterCleanup(FieldName.INTERNAL_ALL_FIELD, new UnicodeToLatexFormatter());
-        entry.setField(BibEntry.KEY_FIELD, "François-Marie Arouet"); // Contains ç, not in Basic Latin
-        cleanup.cleanup(entry);
-
-        assertEquals("François-Marie Arouet", entry.getField(BibEntry.KEY_FIELD).get());
-    }
-
-    @Test
-    public void testCleanupAllTextFieldsIgnoresKeyField() throws Exception {
-        FieldFormatterCleanup cleanup = new FieldFormatterCleanup(FieldName.INTERNAL_ALL_TEXT_FIELDS_FIELD, new UnicodeToLatexFormatter());
-        entry.setField(BibEntry.KEY_FIELD, "François-Marie Arouet"); // Contains ç, not in Basic Latin
-        cleanup.cleanup(entry);
-
-        assertEquals("François-Marie Arouet", entry.getField(BibEntry.KEY_FIELD).get());
-    }
-
-    @Test
-    public void testCleanupKeyFieldCleansUpKeyField() throws Exception {
-        FieldFormatterCleanup cleanup = new FieldFormatterCleanup(BibEntry.KEY_FIELD, new UnicodeToLatexFormatter());
-        entry.setField(BibEntry.KEY_FIELD, "François-Marie Arouet"); // Contains ç, not in Basic Latin
-        cleanup.cleanup(entry);
-
-        assertEquals("Fran{\\c{c}}ois-Marie Arouet", entry.getField(BibEntry.KEY_FIELD).get());
     }
 }

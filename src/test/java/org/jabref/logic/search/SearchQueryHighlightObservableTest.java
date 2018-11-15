@@ -3,31 +3,32 @@ package org.jabref.logic.search;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
-class SearchQueryHighlightObservableTest {
+@RunWith(MockitoJUnitRunner.class)
+public class SearchQueryHighlightObservableTest {
 
     @Captor ArgumentCaptor<Optional<Pattern>> captor;
     @Mock private SearchQueryHighlightListener listener;
     private SearchQueryHighlightObservable observable;
 
-    @BeforeEach
-    void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         observable = new SearchQueryHighlightObservable();
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    void addSearchListenerNotifiesListenerAboutPreviousPattern() throws Exception {
+    public void addSearchListenerNotifiesListenerAboutPreviousPattern() throws Exception {
         observable.fireSearchlistenerEvent(new SearchQuery("test", false, false));
 
         observable.addSearchListener(listener);
@@ -37,7 +38,7 @@ class SearchQueryHighlightObservableTest {
     }
 
     @Test
-    void addSearchListenerNotifiesRegisteredListener() throws Exception {
+    public void addSearchListenerNotifiesRegisteredListener() throws Exception {
         observable.addSearchListener(listener);
 
         observable.fireSearchlistenerEvent(new SearchQuery("test", false, false));
@@ -47,7 +48,7 @@ class SearchQueryHighlightObservableTest {
     }
 
     @Test
-    void addSearchListenerNotifiesRegisteredListenerAboutGrammarBasedSearches() throws Exception {
+    public void addSearchListenerNotifiesRegisteredListenerAboutGrammarBasedSearches() throws Exception {
         observable.addSearchListener(listener);
 
         observable.fireSearchlistenerEvent(new SearchQuery("author=harrer", false, false));

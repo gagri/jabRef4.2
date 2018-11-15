@@ -1,7 +1,5 @@
 package org.jabref.logic.util.io;
 
-import java.nio.file.Path;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -10,10 +8,11 @@ public class FileHistory {
 
     private static final int HISTORY_SIZE = 8;
 
-    private final LinkedList<Path> history;
+    private final LinkedList<String> history;
 
-    public FileHistory(List<Path> files) {
-        history = new LinkedList<>(Objects.requireNonNull(files));
+
+    public FileHistory(List<String> fileList) {
+        history = new LinkedList<>(Objects.requireNonNull(fileList));
     }
 
     public int size() {
@@ -25,25 +24,28 @@ public class FileHistory {
     }
 
     /**
-     * Adds the file to the top of the list. If it already is in the list, it is merely moved to the top.
+     * Adds the filename to the top of the list. If it already is in the list, it is merely moved to the top.
+     *
+     * @param filename a <code>String</code> value
      */
-    public void newFile(Path file) {
-        removeItem(file);
-        history.addFirst(file);
+
+    public void newFile(String filename) {
+        removeItem(filename);
+        history.addFirst(filename);
         while (size() > HISTORY_SIZE) {
             history.removeLast();
         }
     }
 
-    public Path getFileAt(int index) {
-        return history.get(index);
+    public String getFileName(int i) {
+        return history.get(i);
     }
 
-    public void removeItem(Path file) {
-        history.remove(file);
+    public void removeItem(String filename) {
+        history.remove(filename);
     }
 
-    public List<Path> getHistory() {
-        return Collections.unmodifiableList(history);
+    public List<String> getHistory() {
+        return history;
     }
 }

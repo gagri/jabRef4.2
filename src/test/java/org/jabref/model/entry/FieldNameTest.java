@@ -15,4 +15,5 @@ public class FieldNameTest {
     public void testOrFieldsThreeTerms() {
         assertEquals("aaa/bbb/ccc", FieldName.orFields("aaa", "bbb", "ccc"));
     }
+
 }

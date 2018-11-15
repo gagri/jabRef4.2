@@ -88,4 +88,5 @@ public class KeywordListTest {
         assertEquals(new KeywordList(expectedOne, expectedTwo),
                 KeywordList.parse("Parent1 > Node1 > Child1, Parent2 > Node2 > Child2", ',', '>'));
     }
+
 }

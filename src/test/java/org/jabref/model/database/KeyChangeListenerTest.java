@@ -18,6 +18,7 @@ public class KeyChangeListenerTest {
     private BibEntry entry3;
     private BibEntry entry4;
 
+
     @BeforeEach
     public void setUp() {
         db = new BibDatabase();
@@ -40,6 +41,7 @@ public class KeyChangeListenerTest {
         entry4 = new BibEntry();
         entry4.setCiteKey("Entry4");
         db.insertEntry(entry4);
+
     }
 
     @Test
@@ -87,4 +89,5 @@ public class KeyChangeListenerTest {
         db.removeEntry(entry3);
         assertEquals(Optional.empty(), entry2.getField("related"));
     }
+
 }

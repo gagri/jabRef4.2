@@ -1,38 +1,51 @@
 package org.jabref.gui;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Locale;
-import java.util.stream.Stream;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 
+import org.jabref.testutils.category.GUITest;
+
 import org.assertj.swing.core.GenericTypeMatcher;
 import org.assertj.swing.dependency.jsr305.Nonnull;
 import org.assertj.swing.fixture.JTableFixture;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import static org.assertj.swing.finder.WindowFinder.findDialog;
 
-@Tag("GUITest")
+@RunWith(Parameterized.class)
+@Category(GUITest.class)
 public class ParameterizedDialogNewEntryTest extends AbstractUITest {
 
-    @ParameterizedTest
-    @MethodSource("instancesToTest")
-    public void addEntryOfGivenType(String databaseMode, String entryType) {
+    private final String databaseMode;
+    private final String entryType;
+
+
+    public ParameterizedDialogNewEntryTest(String databaseMode, String entryType) {
+        this.databaseMode = databaseMode;
+        this.entryType = entryType;
+    }
+
+    @Test
+    public void addEntryOfGivenType() {
         mainFrame.menuItemWithPath("File", "New " + databaseMode + " database").click();
         JTableFixture entryTable = mainFrame.table();
 
         entryTable.requireRowCount(0);
         mainFrame.menuItemWithPath("BibTeX", "New entry...").click();
 
-        selectEntryType(entryType);
+        selectEntryType();
 
         entryTable.requireRowCount(1);
     }
 
-    private void selectEntryType(String entryType) {
+    private void selectEntryType() {
         GenericTypeMatcher<JDialog> matcher = new GenericTypeMatcher<JDialog>(JDialog.class) {
 
             @Override
@@ -50,18 +63,17 @@ public class ParameterizedDialogNewEntryTest extends AbstractUITest {
         }).click();
     }
 
-    @ParameterizedTest
-    @MethodSource("instancesToTest")
-    public void addEntryPlainTextOfGivenType(String databaseMode, String entryType) {
+    @Test
+    public void addEntryPlainTextOfGivenType() {
         mainFrame.menuItemWithPath("File", "New " + databaseMode + " database").click();
         JTableFixture entryTable = mainFrame.table();
 
         entryTable.requireRowCount(0);
         mainFrame.menuItemWithPath("BibTeX", "New entry from plain text...").click();
 
-        selectEntryType(entryType);
+        selectEntryType();
 
-        GenericTypeMatcher<JDialog> matcher2 = plainTextMatcher(entryType);
+        GenericTypeMatcher<JDialog> matcher2 = plainTextMatcher();
 
         findDialog(matcher2).withTimeout(10_000).using(robot()).button(new GenericTypeMatcher<JButton>(JButton.class) {
 
@@ -74,35 +86,33 @@ public class ParameterizedDialogNewEntryTest extends AbstractUITest {
         entryTable.requireRowCount(1);
     }
 
-    @ParameterizedTest
-    @MethodSource("instancesToTest")
-    public void closeAddingEntryPlainTextOfGivenType(String databaseMode, String entryType) {
+    @Test
+    public void closeAddingEntryPlainTextOfGivenType() {
         mainFrame.menuItemWithPath("File", "New " + databaseMode + " database").click();
         JTableFixture entryTable = mainFrame.table();
 
         entryTable.requireRowCount(0);
         mainFrame.menuItemWithPath("BibTeX", "New entry from plain text...").click();
 
-        selectEntryType(entryType);
+        selectEntryType();
 
-        GenericTypeMatcher<JDialog> matcher2 = plainTextMatcher(entryType);
+        GenericTypeMatcher<JDialog> matcher2 = plainTextMatcher();
 
         findDialog(matcher2).withTimeout(10_000).using(robot()).close();
         entryTable.requireRowCount(0);
     }
 
-    @ParameterizedTest
-    @MethodSource("instancesToTest")
-    public void cancelAddingEntryPlainTextOfGivenType(String databaseMode, String entryType) {
+    @Test
+    public void cancelAddingEntryPlainTextOfGivenType() {
         mainFrame.menuItemWithPath("File", "New " + databaseMode + " database").click();
         JTableFixture entryTable = mainFrame.table();
 
         entryTable.requireRowCount(0);
         mainFrame.menuItemWithPath("BibTeX", "New entry from plain text...").click();
 
-        selectEntryType(entryType);
+        selectEntryType();
 
-        GenericTypeMatcher<JDialog> matcher2 = plainTextMatcher(entryType);
+        GenericTypeMatcher<JDialog> matcher2 = plainTextMatcher();
 
         findDialog(matcher2).withTimeout(10_000).using(robot()).button(new GenericTypeMatcher<JButton>(JButton.class) {
 
@@ -115,7 +125,7 @@ public class ParameterizedDialogNewEntryTest extends AbstractUITest {
         entryTable.requireRowCount(0);
     }
 
-    private GenericTypeMatcher<JDialog> plainTextMatcher(String entryType) {
+    private GenericTypeMatcher<JDialog> plainTextMatcher() {
         GenericTypeMatcher<JDialog> matcher2 = new GenericTypeMatcher<JDialog>(JDialog.class) {
 
             @Override
@@ -126,12 +136,13 @@ public class ParameterizedDialogNewEntryTest extends AbstractUITest {
         return matcher2;
     }
 
-    public static Stream<Object[]> instancesToTest() {
+    @Parameterized.Parameters(name = "{index}: {0} : {1}")
+    public static Collection<Object[]> instancesToTest() {
         // Create entry from menu
         // Structure:
         // {"BibTeX"/"biblatex", "type"}
         // @formatter:off
-        return Stream.of(
+        return Arrays.asList(
                 new Object[]{"BibTeX", "Article"},
 /*                new Object[]{"BibTeX", "InBook"},
                 new Object[]{"BibTeX", "Book"},
@@ -188,4 +199,5 @@ public class ParameterizedDialogNewEntryTest extends AbstractUITest {
         );
         // @formatter:on
     }
+
 }

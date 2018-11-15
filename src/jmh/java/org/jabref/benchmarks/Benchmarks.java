@@ -2,7 +2,6 @@ package org.jabref.benchmarks;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -10,7 +9,9 @@ import java.util.stream.Collectors;
 import org.jabref.Globals;
 import org.jabref.logic.exporter.BibtexDatabaseWriter;
 import org.jabref.logic.exporter.SavePreferences;
+import org.jabref.logic.exporter.StringSaveSession;
 import org.jabref.logic.formatter.bibtexfields.HtmlToLatexFormatter;
+import org.jabref.logic.importer.ParseException;
 import org.jabref.logic.importer.ParserResult;
 import org.jabref.logic.importer.fileformat.BibtexParser;
 import org.jabref.logic.layout.format.HTMLChars;
@@ -36,8 +37,6 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.runner.RunnerException;
 
-import static org.mockito.Mockito.mock;
-
 @State(Scope.Thread)
 public class Benchmarks {
 
@@ -62,11 +61,11 @@ public class Benchmarks {
             entry.setField("rnd", "2" + randomizer.nextInt());
             database.insertEntry(entry);
         }
-        StringWriter outputWriter = new StringWriter();
-        BibtexDatabaseWriter databaseWriter = new BibtexDatabaseWriter(outputWriter, mock(SavePreferences.class));
-        databaseWriter.savePartOfDatabase(
-                new BibDatabaseContext(database, new MetaData(), new Defaults()), database.getEntries());
-        bibtexString = outputWriter.toString();
+        BibtexDatabaseWriter<StringSaveSession> databaseWriter = new BibtexDatabaseWriter<>(StringSaveSession::new);
+        StringSaveSession saveSession = databaseWriter.savePartOfDatabase(
+                new BibDatabaseContext(database, new MetaData(), new Defaults()), database.getEntries(),
+                new SavePreferences());
+        bibtexString = saveSession.getStringValue();
 
         latexConversionString = "{A} \\textbf{bold} approach {\\it to} ${{\\Sigma}}{\\Delta}$ modulator \\textsuperscript{2} \\$";
 
@@ -81,10 +80,11 @@ public class Benchmarks {
 
     @Benchmark
     public String write() throws Exception {
-        StringWriter outputWriter = new StringWriter();
-        BibtexDatabaseWriter databaseWriter = new BibtexDatabaseWriter(outputWriter, mock(SavePreferences.class));
-        databaseWriter.savePartOfDatabase(new BibDatabaseContext(database, new MetaData(), new Defaults()), database.getEntries());
-        return outputWriter.toString();
+        BibtexDatabaseWriter<StringSaveSession> databaseWriter = new BibtexDatabaseWriter<>(StringSaveSession::new);
+        StringSaveSession saveSession = databaseWriter.savePartOfDatabase(
+                new BibDatabaseContext(database, new MetaData(), new Defaults()), database.getEntries(),
+                new SavePreferences());
+        return saveSession.getStringValue();
     }
 
     @Benchmark
@@ -125,7 +125,7 @@ public class Benchmarks {
     }
 
     @Benchmark
-    public boolean keywordGroupContains() {
+    public boolean keywordGroupContains() throws ParseException {
         KeywordGroup group = new WordKeywordGroup("testGroup", GroupHierarchyType.INDEPENDENT, "keyword", "testkeyword", false, ',', false);
         return group.containsAll(database.getEntries());
     }

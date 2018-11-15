@@ -8,12 +8,12 @@ import java.util.function.Predicate;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.StringBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
@@ -21,7 +21,6 @@ import javafx.collections.ObservableMap;
 import javafx.css.PseudoClass;
 import javafx.scene.Node;
 
-import org.fxmisc.easybind.PreboundBinding;
 
 /**
  * Helper methods for javafx binding.
@@ -42,7 +41,23 @@ public class BindingsHelper {
     }
 
     public static void includePseudoClassWhen(Node node, PseudoClass pseudoClass, ObservableValue<? extends Boolean> condition) {
-        condition.addListener((obs, oldValue, newValue) -> node.pseudoClassStateChanged(pseudoClass, newValue));
+        BooleanProperty pseudoClassState = new BooleanPropertyBase(false) {
+            @Override
+            protected void invalidated() {
+                node.pseudoClassStateChanged(pseudoClass, get());
+            }
+
+            @Override
+            public Object getBean() {
+                return node;
+            }
+
+            @Override
+            public String getName() {
+                return pseudoClass.getPseudoClassName();
+            }
+        };
+        pseudoClassState.bind(condition);
     }
 
     /**
@@ -55,19 +70,6 @@ public class BindingsHelper {
      */
     public static <A, B> MappedList<B, A> mapBacked(ObservableList<A> source, Function<A, B> mapper) {
         return new MappedList<>(source, mapper);
-    }
-
-    public static <T, U> ObservableList<U> map(ObservableValue<T> source, Function<T, List<U>> mapper) {
-        PreboundBinding<List<U>> binding = new PreboundBinding<List<U>>(source) {
-            @Override
-            protected List<U> computeValue() {
-                return mapper.apply(source.getValue());
-            }
-        };
-
-        ObservableList<U> list = FXCollections.observableArrayList();
-        binding.addListener((observable, oldValue, newValue) -> list.setAll(newValue));
-        return list;
     }
 
     /**
@@ -146,24 +148,6 @@ public class BindingsHelper {
                 propertyB,
                 updateA,
                 updateB);
-    }
-
-    public static ObservableValue<? extends Boolean> constantOf(boolean value) {
-        return new BooleanBinding() {
-            @Override
-            protected boolean computeValue() {
-                return value;
-            }
-        };
-    }
-
-    public static ObservableValue<? extends String> emptyString() {
-        return new StringBinding() {
-            @Override
-            protected String computeValue() {
-                return "";
-            }
-        };
     }
 
     private static class BidirectionalBinding<A, B> {

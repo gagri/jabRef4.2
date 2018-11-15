@@ -3,6 +3,7 @@ package org.jabref.gui.contentselector;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -81,13 +82,14 @@ public class ContentSelectorDialog extends JabRefDialog {
 
     /**
      *
+     * @param owner the parent Window (Dialog or Frame)
      * @param frame the JabRef Frame
      * @param panel the currently selected BasePanel
      * @param modal should this dialog be modal?
      * @param fieldName the field this selector is initialized for. May be null.
      */
-    public ContentSelectorDialog(JabRefFrame frame, BasePanel panel, boolean modal, String fieldName) {
-        super(Localization.lang("Manage content selectors"), ContentSelectorDialog.class);
+    public ContentSelectorDialog(Window owner, JabRefFrame frame, BasePanel panel, boolean modal, String fieldName) {
+        super(owner, Localization.lang("Manage content selectors"), ContentSelectorDialog.class);
         this.setModal(modal);
         this.metaData = panel.getBibDatabaseContext().getMetaData();
         this.frame = frame;
@@ -195,7 +197,7 @@ public class ContentSelectorDialog extends JabRefDialog {
                 dispose();
             } catch (Exception ex) {
                 LOGGER.info("Could not apply changes in \"Manage content selectors\"", ex);
-                JOptionPane.showMessageDialog(null, Localization.lang("Could not apply changes."));
+                JOptionPane.showMessageDialog(frame, Localization.lang("Could not apply changes."));
             }
         });
 
@@ -208,7 +210,7 @@ public class ContentSelectorDialog extends JabRefDialog {
                 applyChanges();
             } catch (Exception ex) {
                 LOGGER.info("Could not apply changes in \"Manage content selectors\"", ex);
-                JOptionPane.showMessageDialog(null, Localization.lang("Could not apply changes."));
+                JOptionPane.showMessageDialog(frame, Localization.lang("Could not apply changes."));
             }
         });
 

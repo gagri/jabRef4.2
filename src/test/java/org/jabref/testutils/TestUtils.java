@@ -8,7 +8,8 @@ public class TestUtils {
     private static final String PATH_TO_TEST_BIBTEX = "src/test/resources/org/jabref/bibtexFiles/test.bib";
 
     /**
-     * Initialize JabRef. Can be cleaned up with {@link TestUtils#closeJabRef()}
+     * Initialize JabRef. Can be cleaned up with
+     * {@link TestUtils#closeJabRef()}
      *
      * @see TestUtils#closeJabRef()
      */
@@ -22,6 +23,8 @@ public class TestUtils {
      */
     public static void closeJabRef() {
         if (JabRefGUI.getMainFrame() != null) {
+            JabRefGUI.getMainFrame().dispose();
         }
     }
+
 }

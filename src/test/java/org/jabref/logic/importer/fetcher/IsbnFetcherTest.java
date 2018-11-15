@@ -1,7 +1,5 @@
 package org.jabref.logic.importer.fetcher;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import org.jabref.logic.importer.FetcherException;
@@ -20,13 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 @FetcherTest
-class IsbnFetcherTest {
+public class IsbnFetcherTest {
 
     private IsbnFetcher fetcher;
     private BibEntry bibEntry;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         fetcher = new IsbnFetcher(mock(ImportFormatPreferences.class, Answers.RETURNS_DEEP_STUBS));
 
         bibEntry = new BibEntry();
@@ -40,66 +38,61 @@ class IsbnFetcherTest {
         bibEntry.setField("ean", "9780134685991");
         bibEntry.setField("isbn", "0134685997");
         bibEntry.setField("url", "https://www.ebook.de/de/product/28983211/joshua_bloch_effective_java.html");
+
     }
 
     @Test
-    void testName() {
+    public void testName() {
         assertEquals("ISBN", fetcher.getName());
     }
 
     @Test
-    void testHelpPage() {
-        assertEquals("ISBNtoBibTeX", fetcher.getHelpPage().get().getPageName());
+    public void testHelpPage() {
+        assertEquals("ISBNtoBibTeX", fetcher.getHelpPage().getPageName());
     }
 
     @Test
-    void searchByIdSuccessfulWithShortISBN() throws FetcherException {
+    public void searchByIdSuccessfulWithShortISBN() throws FetcherException {
         Optional<BibEntry> fetchedEntry = fetcher.performSearchById("0134685997");
         assertEquals(Optional.of(bibEntry), fetchedEntry);
     }
 
     @Test
-    void searchByIdSuccessfulWithLongISBN() throws FetcherException {
+    public void searchByIdSuccessfulWithLongISBN() throws FetcherException {
         Optional<BibEntry> fetchedEntry = fetcher.performSearchById("9780134685991");
         assertEquals(Optional.of(bibEntry), fetchedEntry);
     }
 
     @Test
-    void searchByIdReturnsEmptyWithEmptyISBN() throws FetcherException {
+    public void searchByIdReturnsEmptyWithEmptyISBN() throws FetcherException {
         Optional<BibEntry> fetchedEntry = fetcher.performSearchById("");
         assertEquals(Optional.empty(), fetchedEntry);
     }
 
     @Test
-    void searchByIdThrowsExceptionForShortInvalidISBN() {
+    public void searchByIdThrowsExceptionForShortInvalidISBN() {
         assertThrows(FetcherException.class, () -> fetcher.performSearchById("123456789"));
     }
 
     @Test
-    void searchByIdThrowsExceptionForLongInvalidISB() {
+    public void searchByIdThrowsExceptionForLongInvalidISB() {
         assertThrows(FetcherException.class, () -> fetcher.performSearchById("012345678910"));
     }
 
     @Test
-    void searchByIdThrowsExceptionForInvalidISBN() {
+    public void searchByIdThrowsExceptionForInvalidISBN() {
         assertThrows(FetcherException.class, () -> fetcher.performSearchById("jabref-4-ever"));
     }
 
-    @Test
-    void searchByEntryWithISBNSuccessful() throws FetcherException {
-        BibEntry input = new BibEntry().withField("isbn", "0134685997");
-
-        List<BibEntry> fetchedEntry = fetcher.performSearch(input);
-        assertEquals(Collections.singletonList(bibEntry), fetchedEntry);
-    }
-
     /**
-     * This test searches for a valid ISBN. See https://www.amazon.de/dp/3728128155/?tag=jabref-21 However, this ISBN is
-     * not available on ebook.de. The fetcher should something as it falls back to Chimbori
+     * This test searches for a valid ISBN. See https://www.amazon.de/dp/3728128155/?tag=jabref-21
+     * However, this ISBN is not available on ebook.de. The fetcher should something as it falls back to Chimbori
+     * @throws FetcherException
      */
     @Test
-    void searchForIsbnAvailableAtChimboriButNonOnEbookDe() throws FetcherException {
+    public void searchForIsbnAvailableAtChimboriButNonOnEbookDe() throws FetcherException {
         Optional<BibEntry> fetchedEntry = fetcher.performSearchById("3728128155");
         assertNotEquals(Optional.empty(), fetchedEntry);
     }
+
 }

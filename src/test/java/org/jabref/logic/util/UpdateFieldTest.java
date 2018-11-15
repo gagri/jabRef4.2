@@ -13,9 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
 public class UpdateFieldTest {
 
     private BibEntry entry;
+
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -166,4 +168,5 @@ public class UpdateFieldTest {
         UpdateField.updateNonDisplayableField(entry, "year", "2016");
         assertFalse(entry.hasChanged());
     }
+
 }

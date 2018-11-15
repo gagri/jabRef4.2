@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.jabref.logic.bibtex.BibEntryAssert;
-import org.jabref.logic.util.StandardFileType;
+import org.jabref.logic.util.FileType;
 import org.jabref.model.entry.BibEntry;
 
 import org.apache.commons.codec.Charsets;
@@ -27,15 +27,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class MedlinePlainImporterTest {
+public class MedlinePlainImporterTest {
+
+    private MedlinePlainImporter importer;
 
     private static final String FILE_ENDING = ".txt";
-    private MedlinePlainImporter importer;
 
     private static Stream<String> fileNames() throws IOException {
         Predicate<String> fileName = name -> name.startsWith("MedlinePlainImporterTest")
@@ -48,38 +49,38 @@ class MedlinePlainImporterTest {
     }
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         importer = new MedlinePlainImporter();
     }
 
     @Test
-    void testsGetExtensions() {
-        assertEquals(StandardFileType.MEDLINE_PLAIN, importer.getFileType());
+    public void testsGetExtensions() {
+        assertEquals(FileType.MEDLINE_PLAIN, importer.getFileType());
     }
 
     @Test
-    void testGetDescription() {
+    public void testGetDescription() {
         assertEquals("Importer for the MedlinePlain format.", importer.getDescription());
     }
 
     @ParameterizedTest
     @MethodSource("fileNames")
-    void testIsRecognizedFormat(String fileName) throws Exception {
+    public void testIsRecognizedFormat(String fileName) throws Exception {
         ImporterTestEngine.testIsRecognizedFormat(importer, fileName);
     }
 
     @Test
-    void doesNotRecognizeEmptyFiles() throws IOException {
+    public void doesNotRecognizeEmptyFiles() throws IOException {
         assertFalse(importer.isRecognizedFormat(readerForString("")));
     }
 
     @Test
-    void testImportMultipleEntriesInSingleFile() throws IOException, URISyntaxException {
+    public void testImportMultipleEntriesInSingleFile() throws IOException, URISyntaxException {
         Path inputFile = Paths
                 .get(MedlinePlainImporter.class.getResource("MedlinePlainImporterTestMultipleEntries.txt").toURI());
 
         List<BibEntry> entries = importer.importDatabase(inputFile, StandardCharsets.UTF_8).getDatabase()
-                                         .getEntries();
+                .getEntries();
         BibEntry testEntry = entries.get(0);
 
         assertEquals(7, entries.size());
@@ -124,14 +125,14 @@ class MedlinePlainImporterTest {
     }
 
     @Test
-    void testEmptyFileImport() throws IOException {
+    public void testEmptyFileImport() throws IOException {
         List<BibEntry> emptyEntries = importer.importDatabase(readerForString("")).getDatabase().getEntries();
 
         assertEquals(Collections.emptyList(), emptyEntries);
     }
 
     @Test
-    void testImportSingleEntriesInSingleFiles() throws IOException, URISyntaxException {
+    public void testImportSingleEntriesInSingleFiles() throws IOException, URISyntaxException {
         List<String> testFiles = Arrays.asList("MedlinePlainImporterTestCompleteEntry",
                 "MedlinePlainImporterTestMultiAbstract", "MedlinePlainImporterTestMultiTitle",
                 "MedlinePlainImporterTestDOI", "MedlinePlainImporterTestInproceeding");
@@ -156,7 +157,7 @@ class MedlinePlainImporterTest {
     }
 
     @Test
-    void testMultiLineComments() throws IOException {
+    public void testMultiLineComments() throws IOException {
         try (BufferedReader reader = readerForString("PMID-22664220" + "\n" + "CON - Comment1" + "\n" + "CIN - Comment2"
                 + "\n" + "EIN - Comment3" + "\n" + "EFR - Comment4" + "\n" + "CRI - Comment5" + "\n" + "CRF - Comment6"
                 + "\n" + "PRIN- Comment7" + "\n" + "PROF- Comment8" + "\n" + "RPI - Comment9" + "\n" + "RPF - Comment10"
@@ -175,7 +176,7 @@ class MedlinePlainImporterTest {
     }
 
     @Test
-    void testKeyWords() throws IOException {
+    public void testKeyWords() throws IOException {
         try (BufferedReader reader = readerForString("PMID-22664795" + "\n" + "MH  - Female" + "\n" + "OT  - Male")) {
             List<BibEntry> actualEntries = importer.importDatabase(reader).getDatabase().getEntries();
 
@@ -187,7 +188,7 @@ class MedlinePlainImporterTest {
     }
 
     @Test
-    void testWithNbibFile() throws IOException, URISyntaxException {
+    public void testWithNbibFile() throws IOException, URISyntaxException {
         Path file = Paths.get(MedlinePlainImporter.class.getResource("NbibImporterTest.nbib").toURI());
 
         List<BibEntry> entries = importer.importDatabase(file, StandardCharsets.UTF_8).getDatabase().getEntries();
@@ -196,7 +197,7 @@ class MedlinePlainImporterTest {
     }
 
     @Test
-    void testWithMultipleEntries() throws IOException, URISyntaxException {
+    public void testWithMultipleEntries() throws IOException, URISyntaxException {
         Path file = Paths
                 .get(MedlinePlainImporter.class.getResource("MedlinePlainImporterStringOutOfBounds.txt").toURI());
 
@@ -206,7 +207,7 @@ class MedlinePlainImporterTest {
     }
 
     @Test
-    void testInvalidFormat() throws URISyntaxException, IOException {
+    public void testInvalidFormat() throws URISyntaxException, IOException {
         Path file = Paths
                 .get(MedlinePlainImporter.class.getResource("MedlinePlainImporterTestInvalidFormat.xml").toURI());
 
@@ -216,7 +217,7 @@ class MedlinePlainImporterTest {
     }
 
     @Test
-    void testNullReader() throws IOException {
+    public void testNullReader() throws IOException {
         Executable fail = () -> {
             try (BufferedReader reader = null) {
                 importer.importDatabase(reader);
@@ -226,7 +227,7 @@ class MedlinePlainImporterTest {
     }
 
     @Test
-    void testAllArticleTypes() throws IOException {
+    public void testAllArticleTypes() throws IOException {
         try (BufferedReader reader = readerForString("PMID-22664795" + "\n" + "MH  - Female\n" + "PT  - journal article"
                 + "\n" + "PT  - classical article" + "\n" + "PT  - corrected and republished article" + "\n"
                 + "PT  - introductory journal article" + "\n" + "PT  - newspaper article")) {
@@ -241,12 +242,12 @@ class MedlinePlainImporterTest {
     }
 
     @Test
-    void testGetFormatName() {
+    public void testGetFormatName() {
         assertEquals("Medline/PubMed Plain", importer.getName());
     }
 
     @Test
-    void testGetCLIId() {
+    public void testGetCLIId() {
         assertEquals("medlineplain", importer.getId());
     }
 }

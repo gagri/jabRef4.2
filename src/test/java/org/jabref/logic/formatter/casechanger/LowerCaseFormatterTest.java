@@ -28,4 +28,5 @@ public class LowerCaseFormatterTest {
     public void formatExample() {
         assertEquals("kde {Amarok}", formatter.format(formatter.getExampleInput()));
     }
+
 }

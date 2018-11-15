@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class UpdateTimestampListenerTest {
+public class UpdateTimestampListenerTest {
 
     private BibDatabase database;
     private BibEntry bibEntry;
@@ -23,7 +23,7 @@ class UpdateTimestampListenerTest {
     private TimestampPreferences timestampPreferencesMock;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         database = new BibDatabase();
         bibEntry = new BibEntry();
 
@@ -36,7 +36,7 @@ class UpdateTimestampListenerTest {
     }
 
     @Test
-    void updateTimestampEnabled() {
+    public void updateTimestampEnabled() {
         final String timestampField = "timestamp";
         final String baseDate = "2000-1-1";
         final String newDate = "2000-1-2";
@@ -59,7 +59,7 @@ class UpdateTimestampListenerTest {
     }
 
     @Test
-    void updateTimestampDisabled() {
+    public void updateTimestampDisabled() {
         final String timestampField = "timestamp";
         final String baseDate = "2000-1-1";
         final String newDate = "2000-1-2";

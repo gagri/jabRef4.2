@@ -10,17 +10,18 @@ import org.jabref.logic.l10n.Localization;
 import org.jabref.model.database.BibDatabaseContext;
 import org.jabref.model.entry.FileFieldParser;
 import org.jabref.model.entry.LinkedFile;
-import org.jabref.model.metadata.FilePreferences;
+import org.jabref.model.metadata.FileDirectoryPreferences;
 import org.jabref.model.strings.StringUtil;
 
 public class FileChecker implements ValueChecker {
 
     private final BibDatabaseContext context;
-    private final FilePreferences filePreferences;
+    private final FileDirectoryPreferences fileDirectoryPreferences;
 
-    public FileChecker(BibDatabaseContext context, FilePreferences filePreferences) {
+
+    public FileChecker(BibDatabaseContext context, FileDirectoryPreferences fileDirectoryPreferences) {
         this.context = context;
-        this.filePreferences = filePreferences;
+        this.fileDirectoryPreferences = fileDirectoryPreferences;
     }
 
     @Override
@@ -34,7 +35,7 @@ public class FileChecker implements ValueChecker {
                 .collect(Collectors.toList());
 
         for (LinkedFile file : linkedFiles) {
-            Optional<Path> linkedFile = file.findIn(context, filePreferences);
+            Optional<Path> linkedFile = file.findIn(context, fileDirectoryPreferences);
             if ((!linkedFile.isPresent()) || !Files.exists(linkedFile.get())) {
                 return Optional.of(Localization.lang("link should refer to a correct file path"));
             }

@@ -3,11 +3,20 @@ package org.jabref.logic.importer;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.jabref.logic.importer.fetcher.ACS;
 import org.jabref.logic.importer.fetcher.AbstractIsbnFetcher;
+import org.jabref.logic.importer.fetcher.ArXiv;
+import org.jabref.logic.importer.fetcher.DoiResolution;
+import org.jabref.logic.importer.fetcher.GoogleScholar;
+import org.jabref.logic.importer.fetcher.IEEE;
 import org.jabref.logic.importer.fetcher.IsbnViaChimboriFetcher;
 import org.jabref.logic.importer.fetcher.IsbnViaEbookDeFetcher;
 import org.jabref.logic.importer.fetcher.MrDLibFetcher;
+import org.jabref.logic.importer.fetcher.OpenAccessDoi;
+import org.jabref.logic.importer.fetcher.ScienceDirect;
+import org.jabref.logic.importer.fetcher.SpringerLink;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,18 +25,18 @@ import org.reflections.Reflections;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
-class WebFetchersTest {
+public class WebFetchersTest {
 
     Reflections reflections = new Reflections("org.jabref");
     ImportFormatPreferences importFormatPreferences;
 
     @BeforeEach
-    void setUp() throws Exception {
+    public void setUp() throws Exception {
         importFormatPreferences = mock(ImportFormatPreferences.class);
     }
 
     @Test
-    void getIdBasedFetchersReturnsAllFetcherDerivingFromIdBasedFetcher() throws Exception {
+    public void getIdBasedFetchersReturnsAllFetcherDerivingFromIdBasedFetcher() throws Exception {
         List<IdBasedFetcher> idFetchers = WebFetchers.getIdBasedFetchers(importFormatPreferences);
 
         Set<Class<? extends IdBasedFetcher>> expected = reflections.getSubTypesOf(IdBasedFetcher.class);
@@ -40,7 +49,7 @@ class WebFetchersTest {
     }
 
     @Test
-    void getEntryBasedFetchersReturnsAllFetcherDerivingFromEntryBasedFetcher() throws Exception {
+    public void getEntryBasedFetchersReturnsAllFetcherDerivingFromEntryBasedFetcher() throws Exception {
         List<EntryBasedFetcher> idFetchers = WebFetchers.getEntryBasedFetchers(importFormatPreferences);
 
         Set<Class<? extends EntryBasedFetcher>> expected = reflections.getSubTypesOf(EntryBasedFetcher.class);
@@ -50,7 +59,7 @@ class WebFetchersTest {
     }
 
     @Test
-    void getSearchBasedFetchersReturnsAllFetcherDerivingFromSearchBasedFetcher() throws Exception {
+    public void getSearchBasedFetchersReturnsAllFetcherDerivingFromSearchBasedFetcher() throws Exception {
         List<SearchBasedFetcher> searchBasedFetchers = WebFetchers.getSearchBasedFetchers(importFormatPreferences);
 
         Set<Class<? extends SearchBasedFetcher>> expected = reflections.getSubTypesOf(SearchBasedFetcher.class);
@@ -59,7 +68,7 @@ class WebFetchersTest {
     }
 
     @Test
-    void getFullTextFetchersReturnsAllFetcherDerivingFromFullTextFetcher() throws Exception {
+    public void getFullTextFetchersReturnsAllFetcherDerivingFromFullTextFetcher() throws Exception {
         List<FulltextFetcher> fullTextFetchers = WebFetchers.getFullTextFetchers(importFormatPreferences);
 
         Set<Class<? extends FulltextFetcher>> expected = reflections.getSubTypesOf(FulltextFetcher.class);
@@ -67,7 +76,7 @@ class WebFetchersTest {
     }
 
     @Test
-    void getIdFetchersReturnsAllFetcherDerivingFromIdFetcher() throws Exception {
+    public void getIdFetchersReturnsAllFetcherDerivingFromIdFetcher() throws Exception {
         List<IdFetcher> idFetchers = WebFetchers.getIdFetchers(importFormatPreferences);
 
         Set<Class<? extends IdFetcher>> expected = reflections.getSubTypesOf(IdFetcher.class);

@@ -39,4 +39,5 @@ public class CopacImporterTestFiles {
     public void testImportEntries(String fileName) throws Exception {
         ImporterTestEngine.testImportEntries(new CopacImporter(), fileName, FILE_ENDING);
     }
+
 }

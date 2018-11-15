@@ -24,6 +24,7 @@ public class FieldFormatterCleanupsTest {
 
     private BibEntry entry;
 
+
     @BeforeEach
     public void setUp() {
         entry = new BibEntry();

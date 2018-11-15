@@ -3,7 +3,6 @@ package org.jabref.gui.util;
 import java.util.function.BiConsumer;
 
 import javafx.scene.Node;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -49,14 +48,7 @@ public class ViewModelListCellFactory<T> implements Callback<ListView<T>, ListCe
     }
 
     public ViewModelListCellFactory<T> withIcon(Callback<T, GlyphIcons> toIcon) {
-        this.toGraphic = viewModel -> {
-            GlyphIcons icon = toIcon.call(viewModel);
-            if (icon != null) {
-                return MaterialDesignIconFactory.get().createIcon(icon);
-            } else {
-                return null;
-            }
-        };
+        this.toGraphic = viewModel -> MaterialDesignIconFactory.get().createIcon(toIcon.call(viewModel));
         return this;
     }
 
@@ -113,15 +105,6 @@ public class ViewModelListCellFactory<T> implements Callback<ListView<T>, ListCe
     public ViewModelListCellFactory<T> setOnDragOver(BiConsumer<T, ? super DragEvent> toOnDragOver) {
         this.toOnDragOver = toOnDragOver;
         return this;
-    }
-
-    public void install(ComboBox<T> comboBox) {
-        comboBox.setButtonCell(this.call(null));
-        comboBox.setCellFactory(this);
-    }
-
-    public void install(ListView<T> listView) {
-        listView.setCellFactory(this);
     }
 
     @Override

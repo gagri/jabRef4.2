@@ -13,16 +13,17 @@ import org.jabref.model.cleanup.CleanupJob;
 import org.jabref.model.database.BibDatabaseContext;
 import org.jabref.model.entry.BibEntry;
 import org.jabref.model.entry.LinkedFile;
-import org.jabref.model.metadata.FilePreferences;
+import org.jabref.model.metadata.FileDirectoryPreferences;
 
 public class RelativePathsCleanup implements CleanupJob {
 
     private final BibDatabaseContext databaseContext;
-    private final FilePreferences filePreferences;
+    private final FileDirectoryPreferences fileDirectoryPreferences;
 
-    public RelativePathsCleanup(BibDatabaseContext databaseContext, FilePreferences filePreferences) {
+
+    public RelativePathsCleanup(BibDatabaseContext databaseContext, FileDirectoryPreferences fileDirectoryPreferences) {
         this.databaseContext = Objects.requireNonNull(databaseContext);
-        this.filePreferences = Objects.requireNonNull(filePreferences);
+        this.fileDirectoryPreferences = Objects.requireNonNull(fileDirectoryPreferences);
     }
 
     @Override
@@ -34,7 +35,7 @@ public class RelativePathsCleanup implements CleanupJob {
         for (LinkedFile fileEntry : fileList) {
             String oldFileName = fileEntry.getLink();
             String newFileName = FileUtil
-                    .relativize(Paths.get(oldFileName), databaseContext.getFileDirectoriesAsPaths(filePreferences))
+                    .shortenFileName(Paths.get(oldFileName), databaseContext.getFileDirectoriesAsPaths(fileDirectoryPreferences))
                     .toString();
 
             LinkedFile newFileEntry = fileEntry;

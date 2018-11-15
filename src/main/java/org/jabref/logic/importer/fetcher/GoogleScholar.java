@@ -117,8 +117,8 @@ public class GoogleScholar implements FulltextFetcher, SearchBasedFetcher {
     }
 
     @Override
-    public Optional<HelpFile> getHelpPage() {
-        return Optional.of(HelpFile.FETCHER_GOOGLE_SCHOLAR);
+    public HelpFile getHelpPage() {
+        return HelpFile.FETCHER_GOOGLE_SCHOLAR;
     }
 
     @Override

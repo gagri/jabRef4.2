@@ -2,10 +2,9 @@ package org.jabref.logic.layout.format;
 
 import org.jabref.logic.layout.ParamLayoutFormatter;
 
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateFormatterTest {
 
@@ -26,4 +25,5 @@ public class DateFormatterTest {
         formatter.setArgument("MM/yyyy");
         assertEquals("07/2016", formatter.format("2016-07-15"));
     }
+
 }

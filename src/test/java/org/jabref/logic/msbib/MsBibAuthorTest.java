@@ -44,4 +44,5 @@ public class MsBibAuthorTest {
         MsBibAuthor msBibAuthor = new MsBibAuthor(author);
         assertEquals("Bach", msBibAuthor.getLastName());
     }
+
 }

@@ -28,4 +28,5 @@ public class CapitalizeFormatterTest {
     public void formatExample() {
         assertEquals("I Have {a} Dream", formatter.format(formatter.getExampleInput()));
     }
+
 }

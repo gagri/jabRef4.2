@@ -2,9 +2,8 @@ package org.jabref.logic.layout.format;
 
 import org.jabref.logic.layout.LayoutFormatter;
 
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AuthorFirstLastCommasTest {
 
@@ -32,4 +31,5 @@ public class AuthorFirstLastCommasTest {
         assertEquals("John von Neumann, John Smith and Peter Black Brown", a
                 .format("John von Neumann and John Smith and Black Brown, Peter"));
     }
+
 }

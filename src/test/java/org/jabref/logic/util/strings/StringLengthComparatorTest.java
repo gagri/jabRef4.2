@@ -9,6 +9,7 @@ public class StringLengthComparatorTest {
 
     private StringLengthComparator slc;
 
+
     @BeforeEach
     public void setUp() {
         slc = new StringLengthComparator();
@@ -20,4 +21,5 @@ public class StringLengthComparatorTest {
         assertEquals(0, slc.compare("AA", "AA"));
         assertEquals(1, slc.compare("AA", "AAA"));
     }
+
 }

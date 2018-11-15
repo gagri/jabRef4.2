@@ -29,6 +29,7 @@ public class TreeNodeTest {
     @Test
     public void constructorChecksThatClassImplementsCorrectInterface() {
         assertThrows(UnsupportedOperationException.class, () -> new WrongTreeNodeImplementation());
+
     }
 
     @Test

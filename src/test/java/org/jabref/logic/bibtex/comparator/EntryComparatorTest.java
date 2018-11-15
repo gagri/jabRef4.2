@@ -4,11 +4,11 @@ import org.jabref.model.entry.BibEntry;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
-class EntryComparatorTest {
+public class EntryComparatorTest {
     @Test
-    void recognizeIdenticObjectsAsEqual() {
+    public void recognizeIdenticObjectsAsEqual() {
         BibEntry e1 = new BibEntry();
         BibEntry e2 = e1;
         assertEquals(0, new EntryComparator(false, false, "").compare(e1, e2));

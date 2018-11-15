@@ -3,17 +3,18 @@ package org.jabref.gui;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 
+import org.jabref.testutils.category.GUITest;
+
 import org.assertj.swing.core.GenericTypeMatcher;
 import org.assertj.swing.dependency.jsr305.Nonnull;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import static org.assertj.swing.finder.WindowFinder.findDialog;
-
 /**
  * This test has been split to work, the other part can be found at DialogTest2
  */
-@Tag("GUITest")
+@Category(GUITest.class)
 public class DialogTest extends AbstractUITest {
 
     @Test

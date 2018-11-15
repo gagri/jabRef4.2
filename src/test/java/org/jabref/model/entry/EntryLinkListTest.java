@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EntryLinkListTest {
 
-    private static final String KEY = "test";
+    private static final String key = "test";
 
     private BibDatabase database;
     private List<ParsedEntryLink> links;
@@ -24,7 +24,7 @@ public class EntryLinkListTest {
     @BeforeEach
     public void before() {
         database = new BibDatabase();
-        links = EntryLinkList.parse(KEY, database);
+        links = EntryLinkList.parse(key, database);
         link = links.get(0);
         source = create("source");
         target = create("target");
@@ -39,7 +39,7 @@ public class EntryLinkListTest {
 
     @Test
     public void givenFieldValueAndDatabaseWhenParsingThenExpectKey() {
-        assertEquals(KEY, link.getKey());
+        assertEquals(key, link.getKey());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class EntryLinkListTest {
 
     @Test
     public void givenFieldValueAndDatabaseWhenParsingThenExpectLink() {
-        ParsedEntryLink expected = new ParsedEntryLink(KEY, database);
+        ParsedEntryLink expected = new ParsedEntryLink(key, database);
         assertEquals(expected, link);
     }
 

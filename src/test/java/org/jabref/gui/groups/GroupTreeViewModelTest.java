@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.jabref.gui.DialogService;
 import org.jabref.gui.StateManager;
 import org.jabref.gui.util.CurrentThreadTaskExecutor;
-import org.jabref.gui.util.CustomLocalDragboard;
 import org.jabref.gui.util.TaskExecutor;
 import org.jabref.model.database.BibDatabaseContext;
 import org.jabref.model.entry.BibEntry;
@@ -33,22 +32,22 @@ public class GroupTreeViewModelTest {
         stateManager = new StateManager();
         stateManager.activeDatabaseProperty().setValue(Optional.of(databaseContext));
         taskExecutor = new CurrentThreadTaskExecutor();
-        groupTree = new GroupTreeViewModel(stateManager, mock(DialogService.class), taskExecutor, new CustomLocalDragboard());
+        groupTree = new GroupTreeViewModel(stateManager, mock(DialogService.class), taskExecutor);
     }
 
     @Test
     public void rootGroupIsAllEntriesByDefault() throws Exception {
         AllEntriesGroup allEntriesGroup = new AllEntriesGroup("All entries");
-        assertEquals(new GroupNodeViewModel(databaseContext, stateManager, taskExecutor, allEntriesGroup, new CustomLocalDragboard()), groupTree.rootGroupProperty().getValue());
+        assertEquals(new GroupNodeViewModel(databaseContext, stateManager, taskExecutor, allEntriesGroup), groupTree.rootGroupProperty().getValue());
     }
 
     @Test
     public void explicitGroupsAreRemovedFromEntriesOnDelete() {
-        ExplicitGroup group = new ExplicitGroup("group", GroupHierarchyType.INDEPENDENT, ',');
+        ExplicitGroup group = new ExplicitGroup("group", GroupHierarchyType.INDEPENDENT,',');
         BibEntry entry = new BibEntry();
         databaseContext.getDatabase().insertEntry(entry);
 
-        GroupNodeViewModel model = new GroupNodeViewModel(databaseContext, stateManager, taskExecutor, group, new CustomLocalDragboard());
+        GroupNodeViewModel model = new GroupNodeViewModel(databaseContext, stateManager, taskExecutor, group);
         model.addEntriesToGroup(databaseContext.getEntries());
         groupTree.removeGroupsAndSubGroupsFromEntries(model);
 
@@ -62,7 +61,7 @@ public class GroupTreeViewModelTest {
         BibEntry entry = new BibEntry();
         databaseContext.getDatabase().insertEntry(entry);
 
-        GroupNodeViewModel model = new GroupNodeViewModel(databaseContext, stateManager, taskExecutor, group, new CustomLocalDragboard());
+        GroupNodeViewModel model = new GroupNodeViewModel(databaseContext, stateManager, taskExecutor, group);
         model.addEntriesToGroup(databaseContext.getEntries());
         groupTree.removeGroupsAndSubGroupsFromEntries(model);
 

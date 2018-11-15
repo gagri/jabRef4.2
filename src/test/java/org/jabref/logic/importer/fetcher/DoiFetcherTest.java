@@ -55,7 +55,7 @@ public class DoiFetcherTest {
 
     @Test
     public void testGetHelpPage() {
-        assertEquals("DOItoBibTeX", fetcher.getHelpPage().get().getPageName());
+        assertEquals("DOItoBibTeX", fetcher.getHelpPage().getPageName());
     }
 
     @Test
@@ -78,11 +78,6 @@ public class DoiFetcherTest {
     @Test
     public void testPerformSearchInvalidDOI() {
         assertThrows(FetcherException.class, () -> fetcher.performSearchById("10.1002/9781118257517F"));
-    }
 
-    @Test
-    public void testPerformSearchNonTrimmedDOI() throws FetcherException {
-        Optional<BibEntry> fetchedEntry = fetcher.performSearchById("http s://doi.org/ 10.1109 /ICWS .2007.59 ");
-        assertEquals(Optional.of(bibEntryDecker2007), fetchedEntry);
     }
 }

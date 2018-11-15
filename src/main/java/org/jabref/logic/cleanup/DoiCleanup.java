@@ -55,9 +55,14 @@ public class DoiCleanup implements CleanupJob {
                 Optional<DOI> doi = entry.getField(field).flatMap(DOI::parse);
 
                 if (doi.isPresent()) {
-                    // Update Doi
-                    Optional<FieldChange> change = entry.setField(FieldName.DOI, doi.get().getDOI());
-                    change.ifPresent(changes::add);
+                    // update Doi
+                    String oldValue = entry.getField(FieldName.DOI).orElse(null);
+                    String newValue = doi.get().getDOI();
+
+                    entry.setField(FieldName.DOI, newValue);
+
+                    FieldChange change = new FieldChange(entry, FieldName.DOI, oldValue, newValue);
+                    changes.add(change);
 
                     removeFieldValue(entry, field, changes);
                 }

@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.jabref.model.database.BibDatabaseContext;
-import org.jabref.model.metadata.FilePreferences;
+import org.jabref.model.metadata.FileDirectoryPreferences;
 
 public class FileHelper {
 
@@ -53,12 +53,12 @@ public class FileHelper {
      * @param name     The filename, may also be a relative path to the file
      */
     public static Optional<Path> expandFilename(final BibDatabaseContext databaseContext, String name,
-                                                FilePreferences filePreferences) {
+            FileDirectoryPreferences fileDirectoryPreferences) {
         Optional<String> extension = getFileExtension(name);
         // Find the default directory for this field type, if any:
-        List<String> directories = databaseContext.getFileDirectories(extension.orElse(null), filePreferences);
+        List<String> directories = databaseContext.getFileDirectories(extension.orElse(null), fileDirectoryPreferences);
         // Include the standard "file" directory:
-        List<String> fileDir = databaseContext.getFileDirectories(filePreferences);
+        List<String> fileDir = databaseContext.getFileDirectories(fileDirectoryPreferences);
 
         List<String> searchDirectories = new ArrayList<>();
         for (String dir : directories) {

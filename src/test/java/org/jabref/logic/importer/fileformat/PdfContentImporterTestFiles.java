@@ -32,4 +32,5 @@ public class PdfContentImporterTestFiles {
     public void testImportEntries(String fileName) throws Exception {
         ImporterTestEngine.testImportEntries(new PdfContentImporter(mock(ImportFormatPreferences.class)), fileName, FILE_ENDING);
     }
+
 }

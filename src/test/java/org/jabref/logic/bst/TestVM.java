@@ -58,6 +58,7 @@ public class TestVM {
         assertEquals(1, vm.getEntries().size());
         assertEquals(5, vm.getEntries().get(0).getFields().size());
         assertEquals(38, vm.getFunctions().size());
+
     }
 
     @Test
@@ -75,6 +76,7 @@ public class TestVM {
         assertEquals("Effective work practices for floss development: A model and propositions", vm
                 .getStack()
                 .pop());
+
     }
 
     @Test
@@ -169,8 +171,8 @@ public class TestVM {
         assertEquals(3, vm.getStack().pop());
         assertEquals(2, vm.getStack().pop());
         assertEquals(0, vm.getStack().size());
-    }
 
+    }
     @Test
     public void testVMArithmetic2() throws RecognitionException {
         VM vm = new VM("FUNCTION {test} { " + "#1 \"HELLO\" + #5 #2 - }" + "EXECUTE {test}");
@@ -664,4 +666,5 @@ public class TestVM {
     private BibEntry t1BibtexEntry() throws IOException {
         return TestVM.bibtexString2BibtexEntry(t1BibtexString());
     }
+
 }

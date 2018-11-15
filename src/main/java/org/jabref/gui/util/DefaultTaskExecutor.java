@@ -27,19 +27,7 @@ public class DefaultTaskExecutor implements TaskExecutor {
 
     private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(5);
 
-    /**
-     *
-     */
     public static <V> V runInJavaFXThread(Callable<V> callable) {
-        if (Platform.isFxApplicationThread()) {
-            try {
-                return callable.call();
-            } catch (Exception e) {
-                LOGGER.error("Problem executing call", e);
-                return null;
-            }
-        }
-
         FutureTask<V> task = new FutureTask<>(callable);
 
         Platform.runLater(task);
@@ -103,12 +91,6 @@ public class DefaultTaskExecutor implements TaskExecutor {
 
             {
                 EasyBind.subscribe(task.progressProperty(), progress -> updateProgress(progress.getWorkDone(), progress.getMax()));
-                EasyBind.subscribe(task.messageProperty(), this::updateMessage);
-                EasyBind.subscribe(task.isCanceledProperty(), cancelled -> {
-                    if (cancelled) {
-                        cancel();
-                    }
-                });
             }
 
             @Override

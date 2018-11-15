@@ -21,4 +21,5 @@ public class AWTExceptionHandler {
             throw new AssertionError("Uncaught exception in EDT", list.get(0));
         }
     }
+
 }

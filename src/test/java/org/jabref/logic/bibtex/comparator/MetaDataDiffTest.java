@@ -19,4 +19,5 @@ public class MetaDataDiffTest {
 
         assertEquals(Optional.empty(), MetaDataDiff.compare(one, two));
     }
+
 }

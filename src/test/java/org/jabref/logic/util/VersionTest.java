@@ -1,5 +1,6 @@
 package org.jabref.logic.util;
 
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -282,4 +283,5 @@ public class VersionTest {
         List<Version> availableVersions = Arrays.asList(Version.parse("2.8-beta"), stable);
         assertEquals(Optional.of(stable), alpha.shouldBeUpdatedTo(availableVersions));
     }
+
 }

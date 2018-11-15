@@ -24,7 +24,7 @@ import org.jabref.logic.journals.Abbreviation;
 import org.jabref.logic.journals.JournalAbbreviationLoader;
 import org.jabref.logic.journals.JournalAbbreviationPreferences;
 import org.jabref.logic.l10n.Localization;
-import org.jabref.logic.util.StandardFileType;
+import org.jabref.logic.util.FileType;
 import org.jabref.preferences.PreferencesService;
 
 import org.slf4j.Logger;
@@ -99,7 +99,7 @@ public class ManageJournalAbbreviationsViewModel extends AbstractViewModel {
                 }
             }
         });
-        isLoading.bind(isLoadingBuiltIn.or(isLoadingIeee));
+        isLoading.bind(isLoadingBuiltIn.and(isLoadingBuiltIn));
     }
 
     public SimpleBooleanProperty isLoadingProperty() {
@@ -121,7 +121,6 @@ public class ManageJournalAbbreviationsViewModel extends AbstractViewModel {
                 .onSuccess(result -> {
                     isLoadingBuiltIn.setValue(false);
                     addList(Localization.lang("JabRef built in list"), result);
-                    selectLastJournalFile();
                 })
                 .onFailure(dialogService::showErrorDialogAndWait)
                 .executeWith(taskExecutor);
@@ -165,7 +164,7 @@ public class ManageJournalAbbreviationsViewModel extends AbstractViewModel {
      */
     public void addNewFile() {
         FileDialogConfiguration fileDialogConfiguration = new FileDialogConfiguration.Builder()
-                .addExtensionFilter(StandardFileType.TXT)
+                .addExtensionFilter(FileType.TXT)
                 .build();
 
         dialogService.showFileSaveDialog(fileDialogConfiguration).ifPresent(this::openFile);
@@ -197,7 +196,7 @@ public class ManageJournalAbbreviationsViewModel extends AbstractViewModel {
 
     public void openFile() {
         FileDialogConfiguration fileDialogConfiguration = new FileDialogConfiguration.Builder()
-                .addExtensionFilter(StandardFileType.TXT)
+                .addExtensionFilter(FileType.TXT)
                 .build();
 
         dialogService.showFileOpenDialog(fileDialogConfiguration).ifPresent(this::openFile);
@@ -351,19 +350,17 @@ public class ManageJournalAbbreviationsViewModel extends AbstractViewModel {
      * {@link JournalAbbreviationLoader#update(JournalAbbreviationPreferences)}.
      */
     public void saveEverythingAndUpdateAutoCompleter() {
-        BackgroundTask.wrap(() -> {
-            saveExternalFilesList();
+        saveExternalFilesList();
 
-            if (shouldWriteLists) {
-                saveJournalAbbreviationFiles();
-                shouldWriteLists = false;
-            }
+        if (shouldWriteLists) {
+            saveJournalAbbreviationFiles();
+            shouldWriteLists = false;
+        }
 
-            // Update journal abbreviation loader
-            journalAbbreviationLoader.update(abbreviationsPreferences);
+        // Update journal abbreviation loader
+        journalAbbreviationLoader.update(abbreviationsPreferences);
 
-            preferences.storeJournalAbbreviationPreferences(abbreviationsPreferences);
-        }).executeWith(taskExecutor);
+        preferences.storeJournalAbbreviationPreferences(abbreviationsPreferences);
     }
 
     public SimpleListProperty<AbbreviationsFileViewModel> journalFilesProperty() {

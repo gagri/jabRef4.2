@@ -1,7 +1,5 @@
 package org.jabref.logic.importer;
 
-import java.util.Optional;
-
 import org.jabref.logic.help.HelpFile;
 
 /**
@@ -22,7 +20,7 @@ public interface WebFetcher {
      *
      * @return the {@link HelpFile} enum constant for the help page
      */
-    default Optional<HelpFile> getHelpPage() {
-        return Optional.empty(); // no help page by default
+    default HelpFile getHelpPage() {
+        return null; // no help page by default
     }
 }

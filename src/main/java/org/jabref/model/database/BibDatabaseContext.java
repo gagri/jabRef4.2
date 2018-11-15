@@ -16,7 +16,7 @@ import org.jabref.model.database.shared.DatabaseLocation;
 import org.jabref.model.database.shared.DatabaseSynchronizer;
 import org.jabref.model.entry.BibEntry;
 import org.jabref.model.entry.FieldName;
-import org.jabref.model.metadata.FilePreferences;
+import org.jabref.model.metadata.FileDirectoryPreferences;
 import org.jabref.model.metadata.MetaData;
 
 /**
@@ -31,7 +31,7 @@ public class BibDatabaseContext {
     /**
      * The file where this database was last saved to.
      */
-    private Optional<Path> file;
+    private File file;
     private DatabaseSynchronizer dbmsSynchronizer;
     private CoarseChangeFilter dbmsListener;
     private DatabaseLocation location;
@@ -57,29 +57,28 @@ public class BibDatabaseContext {
         this.database = Objects.requireNonNull(database);
         this.metaData = Objects.requireNonNull(metaData);
         this.location = DatabaseLocation.LOCAL;
-        this.file = Optional.empty();
     }
 
     public BibDatabaseContext(BibDatabase database, MetaData metaData) {
         this(database, metaData, new Defaults());
     }
 
-    public BibDatabaseContext(BibDatabase database, MetaData metaData, Path file, Defaults defaults,
+    public BibDatabaseContext(BibDatabase database, MetaData metaData, File file, Defaults defaults,
                               DatabaseLocation location) {
         this(database, metaData, defaults);
         Objects.requireNonNull(location);
-        this.file = Optional.ofNullable(file);
+        this.setDatabaseFile(file);
 
         if (location == DatabaseLocation.LOCAL) {
             convertToLocalDatabase();
         }
     }
 
-    public BibDatabaseContext(BibDatabase database, MetaData metaData, Path file, Defaults defaults) {
+    public BibDatabaseContext(BibDatabase database, MetaData metaData, File file, Defaults defaults) {
         this(database, metaData, file, defaults, DatabaseLocation.LOCAL);
     }
 
-    public BibDatabaseContext(BibDatabase database, MetaData metaData, Path file) {
+    public BibDatabaseContext(BibDatabase database, MetaData metaData, File file) {
         this(database, metaData, file, new Defaults());
     }
 
@@ -110,29 +109,19 @@ public class BibDatabaseContext {
      */
     @Deprecated
     public Optional<File> getDatabaseFile() {
-        return file.map(Path::toFile);
+        return Optional.ofNullable(file);
     }
 
-    /**
-     *
-     * @param Set the database file
-     * @deprecated use {@link #setDatabaseFile(Path)}
-     */
-    @Deprecated
     public void setDatabaseFile(File file) {
-        this.file = Optional.ofNullable(file).map(File::toPath);
-    }
-
-    public void setDatabaseFile(Path file) {
-        this.file = Optional.ofNullable(file);
+        this.file = file;
     }
 
     public Optional<Path> getDatabasePath() {
-        return file;
+        return Optional.ofNullable(file).map(File::toPath);
     }
 
     public void clearDatabaseFile() {
-        this.file = Optional.empty();
+        this.file = null;
     }
 
     public BibDatabase getDatabase() {
@@ -151,7 +140,7 @@ public class BibDatabaseContext {
         return getMode() == BibDatabaseMode.BIBLATEX;
     }
 
-    public List<Path> getFileDirectoriesAsPaths(FilePreferences preferences) {
+    public List<Path> getFileDirectoriesAsPaths(FileDirectoryPreferences preferences) {
         // Filter for empty string, as this would be expanded to the jar-directory with Paths.get()
         return getFileDirectories(preferences).stream()
                 .filter(s -> !s.isEmpty())
@@ -162,20 +151,20 @@ public class BibDatabaseContext {
     }
 
     /**
-     * @deprecated use {@link #getFileDirectoriesAsPaths(FilePreferences)} instead
+     * @deprecated use {@link #getFileDirectoriesAsPaths(FileDirectoryPreferences)} instead
      */
     @Deprecated
-    public List<String> getFileDirectories(FilePreferences preferences) {
+    public List<String> getFileDirectories(FileDirectoryPreferences preferences) {
         return getFileDirectories(FieldName.FILE, preferences);
     }
 
     /**
-     * Returns the first existing file directory from  {@link #getFileDirectories(FilePreferences)}
+     * Returns the first existing file directory from  {@link #getFileDirectories(FileDirectoryPreferences)}
      *
-     * @param preferences The FilePreferences
+     * @param preferences The FileDirectoryPreferences
      * @return Optional of Path
      */
-    public Optional<Path> getFirstExistingFileDir(FilePreferences preferences) {
+    public Optional<Path> getFirstExistingFileDir(FileDirectoryPreferences preferences) {
         return getFileDirectoriesAsPaths(preferences).stream().filter(Files::exists).findFirst();
     }
 
@@ -195,16 +184,20 @@ public class BibDatabaseContext {
      * @param preferences The fileDirectory preferences
      * @return The default directory for this field type.
      */
-    public List<String> getFileDirectories(String fieldName, FilePreferences preferences) {
+    public List<String> getFileDirectories(String fieldName, FileDirectoryPreferences preferences) {
         List<String> fileDirs = new ArrayList<>();
 
         // 1. metadata user-specific directory
-        metaData.getUserFileDirectory(preferences.getUser())
-                .ifPresent(userFileDirectory -> fileDirs.add(getFileDirectoryPath(userFileDirectory)));
+        Optional<String> userFileDirectory = metaData.getUserFileDirectory(preferences.getUser());
+        if (userFileDirectory.isPresent()) {
+            fileDirs.add(getFileDirectoryPath(userFileDirectory.get()));
+        }
 
         // 2. metadata general directory
-        metaData.getDefaultFileDirectory()
-                .ifPresent(metaDataDirectory -> fileDirs.add(getFileDirectoryPath(metaDataDirectory)));
+        Optional<String> metaDataDirectory = metaData.getDefaultFileDirectory();
+        if (metaDataDirectory.isPresent()) {
+            fileDirs.add(getFileDirectoryPath(metaDataDirectory.get()));
+        }
 
         // 3. preferences directory
         preferences.getFileDirectory(fieldName).ifPresent(path -> fileDirs.add(path.toAbsolutePath().toString()));
@@ -292,5 +285,4 @@ public class BibDatabaseContext {
     public List<BibEntry> getEntries() {
         return database.getEntries();
     }
-
 }

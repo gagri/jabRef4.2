@@ -20,7 +20,6 @@ import org.jabref.logic.layout.Layout;
 import org.jabref.logic.layout.LayoutFormatterPreferences;
 import org.jabref.logic.layout.LayoutHelper;
 import org.jabref.logic.util.FileType;
-import org.jabref.logic.util.StandardFileType;
 import org.jabref.model.database.BibDatabaseContext;
 import org.jabref.model.entry.BibEntry;
 
@@ -87,6 +86,22 @@ public class TemplateExporter extends Exporter {
         this.savePreferences = savePreferences;
     }
 
+    /**
+     * Initialize another export format based on templates stored in dir with
+     * layoutFile lfFilename.
+     * The display name is automatically derived from the FileType
+     *
+     *
+     * @param consoleName Name to call this format in the console.
+     * @param lfFileName  Name of the main layout file.
+     * @param directory   Directory in which to find the layout file.
+     * @param extension   Should contain the . (for instance .txt).
+     * @param layoutPreferences Preferences for layout
+     * @param savePreferences Preferences for saving
+     */
+    public TemplateExporter(String consoleName, String lfFileName, String directory, FileType extension, LayoutFormatterPreferences layoutPreferences, SavePreferences savePreferences) {
+        this(extension.getDescription(), consoleName, lfFileName, directory, extension, layoutPreferences, savePreferences);
+    }
 
     /**
      * Initialize another export format based on templates stored in dir with
@@ -102,8 +117,8 @@ public class TemplateExporter extends Exporter {
      * @param savePreferences Preferences for saving
      * @param deleteBlankLines If blank lines should be remove (default: false)
      */
-    public TemplateExporter(String consoleName, String lfFileName, String directory, StandardFileType extension, LayoutFormatterPreferences layoutPreferences, SavePreferences savePreferences, boolean deleteBlankLines) {
-        this(consoleName, consoleName, lfFileName, directory, extension, layoutPreferences, savePreferences);
+    public TemplateExporter(String consoleName, String lfFileName, String directory, FileType extension, LayoutFormatterPreferences layoutPreferences, SavePreferences savePreferences, boolean deleteBlankLines) {
+        this(extension.getDescription(), consoleName, lfFileName, directory, extension, layoutPreferences, savePreferences);
         this.deleteBlankLines = deleteBlankLines;
     }
 
@@ -180,8 +195,22 @@ public class TemplateExporter extends Exporter {
         if (entries.isEmpty()) { // Do not export if no entries to export -- avoids exports with only template text
             return;
         }
+        SaveSession saveSession = null;
+        if (this.encoding != null) {
+            try {
+                saveSession = new FileSaveSession(this.encoding, false);
+            } catch (SaveException ex) {
+                // Perhaps the overriding encoding doesn't work?
+                // We will fall back on the default encoding.
+                LOGGER.warn("Cannot get save session.", ex);
+            }
+        }
+        if (saveSession == null) {
+            saveSession = new FileSaveSession(encoding, false);
+        }
 
-        try (AtomicFileWriter ps = new AtomicFileWriter(file, encoding)) {
+        try (VerifyingWriter ps = saveSession.getWriter()) {
+
             Layout beginLayout = null;
 
             // Check if this export filter has bundled name formatters:
@@ -291,7 +320,9 @@ public class TemplateExporter extends Exporter {
                 sb.append(String.join(", ", missingFormatters));
                 LOGGER.warn("Formatters not found", sb);
             }
+            saveSession.finalize(file);
         }
+
     }
 
     /**

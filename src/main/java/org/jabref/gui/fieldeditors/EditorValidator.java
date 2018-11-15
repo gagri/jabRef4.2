@@ -1,7 +1,5 @@
 package org.jabref.gui.fieldeditors;
 
-import javafx.scene.control.TextInputControl;
-
 import org.jabref.gui.util.IconValidationDecorator;
 import org.jabref.preferences.JabRefPreferences;
 
@@ -16,11 +14,11 @@ public class EditorValidator {
         this.preferences = preferences;
     }
 
-    public void configureValidation(final ValidationStatus status, final TextInputControl textInput) {
+    public void configureValidation(ValidationStatus status, EditorTextArea area) {
         if (preferences.getBoolean(JabRefPreferences.VALIDATE_IN_ENTRY_EDITOR)) {
             ControlsFxVisualizer validationVisualizer = new ControlsFxVisualizer();
             validationVisualizer.setDecoration(new IconValidationDecorator());
-            validationVisualizer.initVisualization(status, textInput);
+            validationVisualizer.initVisualization(status, area);
         }
     }
 }

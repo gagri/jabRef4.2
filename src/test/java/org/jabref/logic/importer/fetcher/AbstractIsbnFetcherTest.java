@@ -51,4 +51,5 @@ public abstract class AbstractIsbnFetcherTest {
     public void searchByIdThrowsExceptionForInvalidISBN() {
         assertThrows(FetcherException.class, () -> fetcher.performSearchById("jabref-4-ever"));
     }
+
 }

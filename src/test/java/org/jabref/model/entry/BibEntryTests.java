@@ -36,6 +36,7 @@ public class BibEntryTests {
         emptyEntry = new BibEntry();
         emptyEntry.setType("article");
         emptyEntry.setChanged(false);
+
     }
 
     @Test
@@ -210,6 +211,7 @@ public class BibEntryTests {
     @Test
     public void setNullField() {
         assertThrows(NullPointerException.class, () -> emptyEntry.setField(null));
+
     }
 
     @Test
@@ -220,6 +222,7 @@ public class BibEntryTests {
     @Test
     public void putNullKeywordListThrowsNPE() {
         assertThrows(NullPointerException.class, () -> keywordEntry.putKeywords((KeywordList) null, ','));
+
     }
 
     @Test
@@ -407,6 +410,7 @@ public class BibEntryTests {
         assertTrue(be.isSearchHit());
         be.setSearchHit(false);
         assertFalse(be.isSearchHit());
+
     }
 
     @Test

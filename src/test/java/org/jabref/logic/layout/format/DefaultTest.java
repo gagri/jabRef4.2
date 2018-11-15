@@ -2,9 +2,8 @@ package org.jabref.logic.layout.format;
 
 import org.jabref.logic.layout.ParamLayoutFormatter;
 
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DefaultTest {
 
@@ -46,4 +45,5 @@ public class DefaultTest {
         ParamLayoutFormatter a = new Default();
         assertEquals("", a.format(""));
     }
+
 }

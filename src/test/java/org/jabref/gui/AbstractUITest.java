@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.jabref.JabRefMain;
+import org.jabref.testutils.category.GUITest;
 
 import org.assertj.swing.fixture.AbstractWindowFixture;
 import org.assertj.swing.fixture.FrameFixture;
@@ -16,12 +17,13 @@ import org.assertj.swing.fixture.JTableFixture;
 import org.assertj.swing.image.ScreenshotTaker;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.assertj.swing.timing.Pause;
-import org.junit.jupiter.api.Tag;
+import org.junit.Assert;
+import org.junit.experimental.categories.Category;
 
+import static org.assertj.swing.finder.WindowFinder.findFrame;
 import static org.assertj.swing.launcher.ApplicationLauncher.application;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Tag("GUITest")
+@Category(GUITest.class)
 public abstract class AbstractUITest extends AssertJSwingJUnitTestCase {
 
     protected final static int SPEED_NORMAL = 50;
@@ -40,19 +42,23 @@ public abstract class AbstractUITest extends AssertJSwingJUnitTestCase {
         robot().settings().timeoutToFindSubMenu(1_000);
         robot().settings().delayBetweenEvents(SPEED_NORMAL);
 
-        //mainFrame = findFrame(null).withTimeout(10_000).using(robot());
+        mainFrame = findFrame(JabRefFrame.class).withTimeout(10_000).using(robot());
         robot().waitForIdle();
     }
 
     /**
-     * Returns the absolute Path of the given relative Path The backlashes are replaced with forwardslashes b/c assertJ
-     * can't type the former one on windows
-     *
+     * Returns the absolute Path of the given relative Path
+     * The backlashes are replaced with forwardslashes b/c assertJ can't type the former one on windows
      * @param relativePath the relative path to the resource database
      */
-    protected String getAbsolutePath(String relativePath) throws URISyntaxException {
+    protected String getAbsolutePath(String relativePath) {
         final URL resource = this.getClass().getClassLoader().getResource(relativePath);
-        return Paths.get(resource.toURI()).toAbsolutePath().toString().replace("\\", "/");
+        try {
+            return Paths.get(resource.toURI()).toAbsolutePath().toString().replace("\\", "/");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -95,11 +101,11 @@ public abstract class AbstractUITest extends AssertJSwingJUnitTestCase {
         screenshotTaker.saveComponentAsPng(dialog.target(), file.toString());
     }
 
-    protected void assertColumnValue(JTableFixture table, int rowIndex, int columnIndex, String selectionValue) {
+    protected void assertColumnValue(JTableFixture table, int rowIndex, int columnIndex, String selectionValue){
         String[][] tableContent;
         tableContent = table.contents();
 
         String value = tableContent[rowIndex][columnIndex];
-        assertEquals(value, selectionValue);
+        Assert.assertEquals(value, selectionValue);
     }
 }

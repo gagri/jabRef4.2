@@ -7,6 +7,7 @@ import java.awt.Insets;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputAdapter;
@@ -20,8 +21,8 @@ import org.jabref.preferences.VersionPreferences;
 
 public class NewVersionDialog extends JabRefDialog {
 
-    public NewVersionDialog(Version currentVersion, Version latestVersion) {
-        super(NewVersionDialog.class);
+    public NewVersionDialog(JFrame frame, Version currentVersion, Version latestVersion) {
+        super(frame, NewVersionDialog.class);
         setTitle(Localization.lang("New version available"));
 
         JLabel lblTitle = new JLabel(Localization.lang("A new version of JabRef has been released."));
@@ -86,6 +87,8 @@ public class NewVersionDialog extends JabRefDialog {
 
         add(panel);
         pack();
+        setLocationRelativeTo(frame);
+        setModalityType(ModalityType.APPLICATION_MODAL);
         setVisible(true);
     }
 

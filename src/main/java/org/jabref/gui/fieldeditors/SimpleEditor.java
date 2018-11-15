@@ -1,7 +1,7 @@
 package org.jabref.gui.fieldeditors;
 
+import javafx.fxml.FXML;
 import javafx.scene.Parent;
-import javafx.scene.control.TextInputControl;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
@@ -15,40 +15,24 @@ import org.jabref.preferences.JabRefPreferences;
 
 public class SimpleEditor extends HBox implements FieldEditorFX {
 
-    private final SimpleEditorViewModel viewModel;
-    private final TextInputControl textInput;
+    @FXML private final SimpleEditorViewModel viewModel;
 
-    public SimpleEditor(final String fieldName,
-                        final AutoCompleteSuggestionProvider<?> suggestionProvider,
-                        final FieldCheckers fieldCheckers,
-                        final JabRefPreferences preferences,
-                        final boolean isSingleLine) {
+    public SimpleEditor(String fieldName, AutoCompleteSuggestionProvider<?> suggestionProvider, FieldCheckers fieldCheckers, JabRefPreferences preferences) {
         this.viewModel = new SimpleEditorViewModel(fieldName, suggestionProvider, fieldCheckers);
 
-        textInput = isSingleLine
-                ? new EditorTextField()
-                : new EditorTextArea();
-        HBox.setHgrow(textInput, Priority.ALWAYS);
+        EditorTextArea textArea = new EditorTextArea();
+        HBox.setHgrow(textArea, Priority.ALWAYS);
+        textArea.textProperty().bindBidirectional(viewModel.textProperty());
+        textArea.addToContextMenu(EditorMenus.getDefaultMenu(textArea));
+        this.getChildren().add(textArea);
 
-        textInput.textProperty().bindBidirectional(viewModel.textProperty());
-        ((ContextMenuAddable) textInput).addToContextMenu(EditorMenus.getDefaultMenu(textInput));
-        this.getChildren().add(textInput);
-
-        AutoCompletionTextInputBinding<?> autoCompleter = AutoCompletionTextInputBinding.autoComplete(textInput, viewModel::complete, viewModel.getAutoCompletionStrategy());
+        AutoCompletionTextInputBinding<?> autoCompleter = AutoCompletionTextInputBinding.autoComplete(textArea, viewModel::complete, viewModel.getAutoCompletionStrategy());
         if (suggestionProvider instanceof ContentSelectorSuggestionProvider) {
             // If content selector values are present, then we want to show the auto complete suggestions immediately on focus
             autoCompleter.setShowOnFocus(true);
         }
 
-        new EditorValidator(preferences).configureValidation(viewModel.getFieldValidator().getValidationStatus(), textInput);
-    }
-
-
-    public SimpleEditor(final String fieldName,
-                        final AutoCompleteSuggestionProvider<?> suggestionProvider,
-                        final FieldCheckers fieldCheckers,
-                        final JabRefPreferences preferences) {
-        this(fieldName, suggestionProvider, fieldCheckers, preferences, false);
+        new EditorValidator(preferences).configureValidation(viewModel.getFieldValidator().getValidationStatus(), textArea);
     }
 
     @Override
@@ -59,10 +43,5 @@ public class SimpleEditor extends HBox implements FieldEditorFX {
     @Override
     public Parent getNode() {
         return this;
-    }
-
-    @Override
-    public void requestFocus() {
-        textInput.requestFocus();
     }
 }

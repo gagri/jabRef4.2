@@ -41,12 +41,8 @@ public final class IntegrityMessage implements Cloneable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         IntegrityMessage that = (IntegrityMessage) o;
         return Objects.equals(entry, that.entry) &&
                 Objects.equals(fieldName, that.fieldName) &&
@@ -57,4 +53,5 @@ public final class IntegrityMessage implements Cloneable {
     public int hashCode() {
         return Objects.hash(entry, fieldName, message);
     }
+
 }

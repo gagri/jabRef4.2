@@ -15,7 +15,6 @@ import java.util.function.BiFunction;
 import javafx.concurrent.Task;
 
 import org.jabref.Globals;
-import org.jabref.gui.actions.CopyFilesAction;
 import org.jabref.logic.l10n.Localization;
 import org.jabref.logic.util.OS;
 import org.jabref.logic.util.io.FileUtil;
@@ -74,7 +73,7 @@ public class CopyFilesTask extends Task<List<CopyFilesResultItemViewModel>> {
 
                     LinkedFile fileName = files.get(j);
 
-                    Optional<Path> fileToExport = fileName.findIn(databaseContext, Globals.prefs.getFilePreferences());
+                    Optional<Path> fileToExport = fileName.findIn(databaseContext, Globals.prefs.getFileDirectoryPreferences());
 
                     newPath = OptionalUtil.combine(Optional.of(exportPath), fileToExport, resolvePathFilename);
 

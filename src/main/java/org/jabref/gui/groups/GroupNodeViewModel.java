@@ -11,25 +11,22 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.input.Dragboard;
 import javafx.scene.paint.Color;
 
 import org.jabref.gui.DragAndDropDataFormats;
+import org.jabref.gui.IconTheme;
 import org.jabref.gui.StateManager;
-import org.jabref.gui.icon.IconTheme;
-import org.jabref.gui.icon.InternalMaterialDesignIcon;
-import org.jabref.gui.icon.JabRefIcon;
 import org.jabref.gui.util.BackgroundTask;
 import org.jabref.gui.util.BindingsHelper;
-import org.jabref.gui.util.CustomLocalDragboard;
 import org.jabref.gui.util.TaskExecutor;
 import org.jabref.logic.groups.DefaultGroupsFactory;
 import org.jabref.logic.layout.format.LatexToUnicodeFormatter;
 import org.jabref.model.FieldChange;
 import org.jabref.model.database.BibDatabaseContext;
 import org.jabref.model.entry.BibEntry;
+import org.jabref.model.entry.event.EntryEvent;
 import org.jabref.model.groups.AbstractGroup;
 import org.jabref.model.groups.AutomaticGroup;
 import org.jabref.model.groups.GroupEntryChanger;
@@ -37,6 +34,7 @@ import org.jabref.model.groups.GroupTreeNode;
 import org.jabref.model.strings.StringUtil;
 
 import com.google.common.base.Enums;
+import com.google.common.eventbus.Subscribe;
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon;
 import org.fxmisc.easybind.EasyBind;
 
@@ -54,14 +52,12 @@ public class GroupNodeViewModel {
     private final BooleanBinding anySelectedEntriesMatched;
     private final BooleanBinding allSelectedEntriesMatched;
     private final TaskExecutor taskExecutor;
-    private final CustomLocalDragboard localDragBoard;
 
-    public GroupNodeViewModel(BibDatabaseContext databaseContext, StateManager stateManager, TaskExecutor taskExecutor, GroupTreeNode groupNode, CustomLocalDragboard localDragBoard) {
+    public GroupNodeViewModel(BibDatabaseContext databaseContext, StateManager stateManager, TaskExecutor taskExecutor, GroupTreeNode groupNode) {
         this.databaseContext = Objects.requireNonNull(databaseContext);
         this.taskExecutor = Objects.requireNonNull(taskExecutor);
         this.stateManager = Objects.requireNonNull(stateManager);
         this.groupNode = Objects.requireNonNull(groupNode);
-        this.localDragBoard = Objects.requireNonNull(localDragBoard);
 
         LatexToUnicodeFormatter formatter = new LatexToUnicodeFormatter();
         displayName = formatter.format(groupNode.getName());
@@ -84,23 +80,23 @@ public class GroupNodeViewModel {
         expandedProperty.addListener((observable, oldValue, newValue) -> groupNode.getGroup().setExpanded(newValue));
 
         // Register listener
-        databaseContext.getDatabase().getEntries().addListener(this::onDatabaseChanged);
+        databaseContext.getDatabase().registerListener(this);
 
         ObservableList<Boolean> selectedEntriesMatchStatus = EasyBind.map(stateManager.getSelectedEntries(), groupNode::matches);
         anySelectedEntriesMatched = BindingsHelper.any(selectedEntriesMatchStatus, matched -> matched);
         allSelectedEntriesMatched = BindingsHelper.all(selectedEntriesMatchStatus, matched -> matched);
     }
 
-    public GroupNodeViewModel(BibDatabaseContext databaseContext, StateManager stateManager, TaskExecutor taskExecutor, AbstractGroup group, CustomLocalDragboard localDragboard) {
-        this(databaseContext, stateManager, taskExecutor, new GroupTreeNode(group), localDragboard);
+    public GroupNodeViewModel(BibDatabaseContext databaseContext, StateManager stateManager, TaskExecutor taskExecutor, AbstractGroup group) {
+        this(databaseContext, stateManager, taskExecutor, new GroupTreeNode(group));
     }
 
-    static GroupNodeViewModel getAllEntriesGroup(BibDatabaseContext newDatabase, StateManager stateManager, TaskExecutor taskExecutor, CustomLocalDragboard localDragBoard) {
-        return new GroupNodeViewModel(newDatabase, stateManager, taskExecutor, DefaultGroupsFactory.getAllEntriesGroup(), localDragBoard);
+    static GroupNodeViewModel getAllEntriesGroup(BibDatabaseContext newDatabase, StateManager stateManager, TaskExecutor taskExecutor) {
+        return new GroupNodeViewModel(newDatabase, stateManager, taskExecutor, DefaultGroupsFactory.getAllEntriesGroup());
     }
 
     private GroupNodeViewModel toViewModel(GroupTreeNode child) {
-        return new GroupNodeViewModel(databaseContext, stateManager, taskExecutor, child, localDragBoard);
+        return new GroupNodeViewModel(databaseContext, stateManager, taskExecutor, child);
     }
 
     public List<FieldChange> addEntriesToGroup(List<BibEntry> entries) {
@@ -181,25 +177,14 @@ public class GroupNodeViewModel {
         return groupNode.hashCode();
     }
 
-    public JabRefIcon getIcon() {
+    public MaterialDesignIcon getIcon() {
         Optional<String> iconName = groupNode.getGroup().getIconName();
         return iconName.flatMap(this::parseIcon)
-                       .orElseGet(this::createDefaultIcon);
+                .orElse(IconTheme.JabRefIcon.DEFAULT_GROUP_ICON.getUnderlyingIcon());
     }
 
-    private JabRefIcon createDefaultIcon() {
-        Optional<Color> color = groupNode.getGroup().getColor();
-        if (color.isPresent()) {
-            return IconTheme.JabRefIcons.DEFAULT_GROUP_ICON_COLORED.withColor(color.get());
-        } else {
-            return IconTheme.JabRefIcons.DEFAULT_GROUP_ICON_COLORED.withColor(Color.web("#8a8a8a"));
-        }
-    }
-
-    private Optional<JabRefIcon> parseIcon(String iconCode) {
-        return Enums.getIfPresent(MaterialDesignIcon.class, iconCode.toUpperCase(Locale.ENGLISH))
-                    .toJavaUtil()
-                    .map(icon -> new InternalMaterialDesignIcon(getColor(), icon));
+    private Optional<MaterialDesignIcon> parseIcon(String iconCode) {
+        return Enums.getIfPresent(MaterialDesignIcon.class, iconCode.toUpperCase(Locale.ENGLISH)).toJavaUtil();
     }
 
     public ObservableList<GroupNodeViewModel> getChildren() {
@@ -211,9 +196,10 @@ public class GroupNodeViewModel {
     }
 
     /**
-     * Gets invoked if an entry in the current database changes.
-     */
-    private void onDatabaseChanged(ListChangeListener.Change<? extends BibEntry> change) {
+    * Gets invoked if an entry in the current database changes.
+    */
+    @Subscribe
+    public void listen(@SuppressWarnings("unused") EntryEvent entryEvent) {
         calculateNumberOfMatches();
     }
 
@@ -260,7 +246,7 @@ public class GroupNodeViewModel {
     public boolean acceptableDrop(Dragboard dragboard) {
         // TODO: we should also check isNodeDescendant
         boolean canDropOtherGroup = dragboard.hasContent(DragAndDropDataFormats.GROUP);
-        boolean canDropEntries = localDragBoard.hasType(DragAndDropDataFormats.BIBENTRY_LIST_CLASS)
+        boolean canDropEntries = dragboard.hasContent(DragAndDropDataFormats.ENTRIES)
                 && (groupNode.getGroup() instanceof GroupEntryChanger);
         return canDropOtherGroup || canDropEntries;
     }

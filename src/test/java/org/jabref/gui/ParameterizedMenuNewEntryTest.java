@@ -1,21 +1,33 @@
 package org.jabref.gui;
 
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.jabref.model.strings.StringUtil;
+import org.jabref.testutils.category.GUITest;
 
 import org.assertj.swing.fixture.JTableFixture;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-@Tag("GUITest")
+@RunWith(Parameterized.class)
+@Category(GUITest.class)
 public class ParameterizedMenuNewEntryTest extends AbstractUITest {
 
+    private final String databaseMode;
+    private final String entryType;
+
+
+    public ParameterizedMenuNewEntryTest(String databaseMode, String entryType) {
+        this.databaseMode = databaseMode;
+        this.entryType = entryType;
+    }
+
     // Not working on Travis
-    @ParameterizedTest
-    @MethodSource("instancesToTest")
-    public void addEntryOfGivenType(String databaseMode, String entryType) {
+    @Test
+    public void addEntryOfGivenType() {
         mainFrame.menuItemWithPath("File", "New " + databaseMode + " database").click();
         JTableFixture entryTable = mainFrame.table();
 
@@ -24,12 +36,13 @@ public class ParameterizedMenuNewEntryTest extends AbstractUITest {
         entryTable.requireRowCount(1);
     }
 
-    public static Stream<Object[]> instancesToTest() {
+    @Parameterized.Parameters(name = "{index}: {0} : {1}")
+    public static Collection<Object[]> instancesToTest() {
         // Create entry from menu
         // Structure:
         // {"BibTeX"/"biblatex", "type"}
         // @formatter:off
-        return Stream.of(
+        return Arrays.asList(
                 new Object[]{"BibTeX", "article"},
                 new Object[]{"BibTeX", "inbook"},
                 new Object[]{"BibTeX", "book"},
@@ -61,4 +74,5 @@ public class ParameterizedMenuNewEntryTest extends AbstractUITest {
         );
         // @formatter:on
     }
+
 }

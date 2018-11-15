@@ -21,4 +21,5 @@ public class NormalizeMonthFormatterTest {
     public void formatExample() {
         assertEquals("#dec#", formatter.format(formatter.getExampleInput()));
     }
+
 }

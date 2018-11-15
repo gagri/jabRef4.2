@@ -1,3 +1,6 @@
+/**
+ *
+ */
 package org.jabref.logic.importer.fetcher;
 
 import java.io.IOException;
@@ -11,8 +14,8 @@ import org.jabref.logic.importer.EntryBasedFetcher;
 import org.jabref.logic.importer.FetcherException;
 import org.jabref.logic.importer.ParserResult;
 import org.jabref.logic.importer.fileformat.MrDLibImporter;
+import org.jabref.logic.l10n.Localization;
 import org.jabref.logic.net.URLDownload;
-import org.jabref.logic.util.Version;
 import org.jabref.model.database.BibDatabase;
 import org.jabref.model.entry.BibEntry;
 import org.jabref.model.entry.FieldName;
@@ -22,16 +25,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is responsible for getting the recommendations from Mr. DLib
+ * This class is responible to get the recommendations from MDL
  */
 public class MrDLibFetcher implements EntryBasedFetcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(MrDLibFetcher.class);
+
     private static final String NAME = "MDL_FETCHER";
     private final String LANGUAGE;
-    private final Version VERSION;
+    private final String VERSION;
 
 
-    public MrDLibFetcher(String language, Version version) {
+    public MrDLibFetcher(String language, String version) {
         LANGUAGE = language;
         VERSION = version;
     }
@@ -47,22 +51,22 @@ public class MrDLibFetcher implements EntryBasedFetcher {
         if (title.isPresent()) {
             String response = makeServerRequest(title.get());
             MrDLibImporter importer = new MrDLibImporter();
-            ParserResult parserResult;
+            ParserResult parserResult = new ParserResult();
             try {
                 if (importer.isRecognizedFormat(response)) {
                     parserResult = importer.importDatabase(response);
                 } else {
                     // For displaying An ErrorMessage
-                    String error = importer.getResponseErrorMessage(response);
                     BibEntry errorBibEntry = new BibEntry();
-                    errorBibEntry.setField("html_representation", error);
+                    errorBibEntry.setField("html_representation",
+                            Localization.lang("Error while fetching from %0", "Mr.DLib"));
                     BibDatabase errorBibDataBase = new BibDatabase();
                     errorBibDataBase.insertEntry(errorBibEntry);
                     parserResult = new ParserResult(errorBibDataBase);
                 }
             } catch (IOException e) {
                 LOGGER.error(e.getMessage(), e);
-                throw new FetcherException("JSON Parser IOException.");
+                throw new FetcherException("XML Parser IOException.");
             }
             return parserResult.getDatabase().getEntries();
         } else {
@@ -74,13 +78,13 @@ public class MrDLibFetcher implements EntryBasedFetcher {
     /**
      * Contact the server with the title of the selected item
      *
-     * @param queryByTitle: The query holds the title of the selected entry. Used to make a query to the MDL Server
+     * @param query: The query holds the title of the selected entry. Used to make a query to the MDL Server
      * @return Returns the server response. This is an XML document as a String.
      */
     private String makeServerRequest(String queryByTitle) throws FetcherException {
         try {
             URLDownload urlDownload = new URLDownload(constructQuery(queryByTitle));
-            URLDownload.bypassSSLVerification();
+            urlDownload.bypassSSLVerification();
             String response = urlDownload.asString();
 
             //Conversion of < and >
@@ -93,33 +97,29 @@ public class MrDLibFetcher implements EntryBasedFetcher {
     }
 
     /**
-     * Constructs the query based on title of the BibEntry. Adds statistical stuff to the url.
+     * Constructs the query based on title of the bibentry. Adds statistical stuff to the url.
      *
-     * @param queryWithTitle: the title of the bib entry.
+     * @param query: the title of the bib entry.
      * @return the string used to make the query at mdl server
      */
     private String constructQuery(String queryWithTitle) {
         // The encoding does not work for / so we convert them by our own
-        queryWithTitle = queryWithTitle.replaceAll("/", " ");
+        queryWithTitle = queryWithTitle.replaceAll("/", "convbckslsh");
         URIBuilder builder = new URIBuilder();
-        builder.setScheme("http");
-        builder.setHost(getMdlUrl());
-        builder.setPath("/v2/items/" + queryWithTitle + "/related_items");
+        builder.setScheme("https");
+        builder.setHost("api.mr-dlib.org");
+        builder.setPath("/v1/documents/" + queryWithTitle + "/related_documents");
         builder.addParameter("partner_id", "jabref");
         builder.addParameter("app_id", "jabref_desktop");
-        builder.addParameter("app_version", VERSION.getFullVersion());
+        builder.addParameter("app_version", VERSION);
         builder.addParameter("app_lang", LANGUAGE);
+        URI uri = null;
         try {
-            URI uri = builder.build();
-            LOGGER.trace("Request: " + uri.toString());
+            uri = builder.build();
             return uri.toString();
         } catch (URISyntaxException e) {
             LOGGER.error(e.getMessage(), e);
         }
         return "";
-    }
-
-    private String getMdlUrl() {
-        return VERSION.isDevelopmentVersion() ? "api-dev.darwingoliath.com" : "api.darwingoliath.com";
     }
 }

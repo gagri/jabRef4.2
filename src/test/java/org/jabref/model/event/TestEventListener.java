@@ -11,6 +11,7 @@ public class TestEventListener {
 
     private BibEntry bibEntry;
 
+
     @Subscribe
     public void listen(EntryAddedEvent event) {
         this.bibEntry = event.getBibEntry();
@@ -29,4 +30,5 @@ public class TestEventListener {
     public BibEntry getBibEntry() {
         return this.bibEntry;
     }
+
 }

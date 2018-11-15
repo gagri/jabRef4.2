@@ -43,7 +43,7 @@ public class TitleFetcherTest {
 
     @Test
     public void testGetHelpPage() {
-        assertEquals("TitleToBibTeX", fetcher.getHelpPage().get().getPageName());
+        assertEquals("TitleToBibTeX", fetcher.getHelpPage().getPageName());
     }
 
     @Test
@@ -63,4 +63,5 @@ public class TitleFetcherTest {
         Optional<BibEntry> fetchedEntry = fetcher.performSearchById("An unknown title where noi DOI can be determined");
         assertEquals(Optional.empty(), fetchedEntry);
     }
+
 }

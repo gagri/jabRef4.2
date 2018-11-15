@@ -8,7 +8,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import org.jabref.JabRefGUI;
 import org.jabref.gui.DialogService;
 import org.jabref.gui.autocompleter.AutoCompleteSuggestionProvider;
 import org.jabref.gui.desktop.JabRefDesktop;
@@ -87,8 +86,8 @@ public class IdentifierEditorViewModel extends AbstractEditorViewModel {
         return identifierLookupInProgress;
     }
 
-    public void fetchInformationByIdentifier(BibEntry entry) {
-        new FetchAndMergeEntry(JabRefGUI.getMainFrame().getCurrentBasePanel(), taskExecutor).fetchAndMerge(entry, fieldName);
+    public FetchAndMergeEntry fetchInformationByIdentifier(BibEntry entry) {
+        return new FetchAndMergeEntry(entry, fieldName);
     }
 
     public void lookupIdentifier(BibEntry entry) {

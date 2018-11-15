@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
-import org.jabref.logic.util.StandardFileType;
+import org.jabref.logic.util.FileType;
 import org.jabref.model.entry.BibEntry;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,13 +25,15 @@ public class CopacImporterTest {
 
     @Test
     public void testsGetExtensions() {
-        assertEquals(StandardFileType.TXT, importer.getFileType());
+        assertEquals(FileType.COPAC, importer.getFileType());
+
     }
 
     @Test
     public void testGetDescription() {
         assertEquals("Importer for COPAC format.", importer.getDescription());
     }
+
 
     @Test
     public void testImportEmptyEntries() throws Exception {

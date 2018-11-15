@@ -64,6 +64,7 @@ public class ArXivTest {
         entry.setField(FieldName.TITLE, "Pause Point Spectra in DNA Constant-Force Unzipping");
 
         assertEquals(Optional.of(new URL("http://arxiv.org/pdf/cond-mat/0406246v1")), finder.findFullText(entry));
+
     }
 
     @Test
@@ -168,11 +169,6 @@ public class ArXivTest {
     }
 
     @Test
-    public void searchEntryByIdWith4DigitsAndPrefixAndNotTrimmed() throws Exception {
-        assertEquals(Optional.of(sliceTheoremPaper), finder.performSearchById("arXiv : 1405. 2249"));
-    }
-
-    @Test
     public void searchEntryByIdWith5Digits() throws Exception {
         assertEquals(Optional.of(
                 "An Optimal Convergence Theorem for Mean Curvature Flow of Arbitrary Codimension in Hyperbolic Spaces"),
@@ -189,25 +185,5 @@ public class ArXivTest {
         sliceTheoremPaper.clearField(FieldName.EPRINT);
 
         assertEquals(ArXivIdentifier.parse("1405.2249v1"), finder.findIdentifier(sliceTheoremPaper));
-    }
-
-    @Test
-    public void searchEmptyId() throws Exception {
-        assertEquals(Optional.empty(), finder.performSearchById(""));
-    }
-
-    @Test
-    public void searchWithHttpUrl() throws Exception {
-        assertEquals(Optional.of(sliceTheoremPaper), finder.performSearchById("http://arxiv.org/abs/1405.2249"));
-    }
-
-    @Test
-    public void searchWithHttpsUrl() throws Exception {
-        assertEquals(Optional.of(sliceTheoremPaper), finder.performSearchById("https://arxiv.org/abs/1405.2249"));
-    }
-
-    @Test
-    public void searchWithHttpsUrlNotTrimmed() throws Exception {
-        assertEquals(Optional.of(sliceTheoremPaper), finder.performSearchById("https : // arxiv . org / abs / 1405 . 2249 "));
     }
 }

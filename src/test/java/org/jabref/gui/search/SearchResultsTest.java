@@ -1,10 +1,14 @@
 package org.jabref.gui.search;
 
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
 
+import org.jabref.gui.BasePanel;
+import org.jabref.model.entry.BibEntry;
 import org.jabref.testutils.TestUtils;
+import org.jabref.testutils.category.GUITest;
 
 import org.assertj.swing.core.ComponentFinder;
 import org.assertj.swing.edt.FailOnThreadViolationRepaintManager;
@@ -12,16 +16,18 @@ import org.assertj.swing.finder.WindowFinder;
 import org.assertj.swing.fixture.FrameFixture;
 import org.assertj.swing.fixture.JTextComponentFixture;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
-@Tag("GUITest")
+@Category(GUITest.class)
 public class SearchResultsTest extends AssertJSwingJUnitTestCase {
 
     private FrameFixture frameFixture;
 
-    @BeforeAll
+
+    @BeforeClass
     public static void before() {
         FailOnThreadViolationRepaintManager.uninstall();
     }
@@ -45,7 +51,6 @@ public class SearchResultsTest extends AssertJSwingJUnitTestCase {
         frameFixture.menuItemWithPath("Search", "Search").click();
         JTextComponentFixture searchField = frameFixture.textBox();
         ComponentFinder finder = robot().finder();
-        /*
         BasePanel panel = finder.findByType(BasePanel.class);
         Collection<BibEntry> entries = panel.getDatabase().getEntries();
 
@@ -63,12 +68,10 @@ public class SearchResultsTest extends AssertJSwingJUnitTestCase {
         searchField.deleteText().enterText("entrytype=book");
         Assert.assertFalse(entries.stream().noneMatch(entry -> entry.isSearchHit()));
         Assert.assertEquals(1, entries.stream().filter(entry -> entry.isSearchHit()).count());
-        */
     }
 
     @Test
     public void testSeachWithoutResults() {
-        /*
         frameFixture.menuItemWithPath("Search", "Search").click();
         JTextComponentFixture searchField = frameFixture.textBox();
         ComponentFinder finder = robot().finder();
@@ -77,12 +80,10 @@ public class SearchResultsTest extends AssertJSwingJUnitTestCase {
 
         searchField.deleteText().enterText("asdf");
         Assert.assertTrue(entries.stream().noneMatch(entry -> entry.isSearchHit()));
-        */
     }
 
     @Test
     public void testSearchInvalidQuery() {
-        /*
         frameFixture.menuItemWithPath("Search", "Search").click();
         JTextComponentFixture searchField = frameFixture.textBox();
         ComponentFinder finder = robot().finder();
@@ -91,6 +92,6 @@ public class SearchResultsTest extends AssertJSwingJUnitTestCase {
 
         searchField.deleteText().enterText("asdf[");
         Assert.assertTrue(entries.stream().noneMatch(entry -> entry.isSearchHit()));
-        */
     }
+
 }

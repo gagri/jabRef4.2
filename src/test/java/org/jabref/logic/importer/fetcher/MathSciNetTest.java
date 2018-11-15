@@ -1,6 +1,5 @@
 package org.jabref.logic.importer.fetcher;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,16 +55,8 @@ class MathSciNetTest {
         searchEntry.setField("journal", "fluid");
 
         List<BibEntry> fetchedEntries = fetcher.performSearch(searchEntry);
-        assertEquals(Collections.singletonList(ratiuEntry), fetchedEntries);
-    }
-
-    @Test
-    void searchByIdInEntryFindsEntry() throws Exception {
-        BibEntry searchEntry = new BibEntry();
-        searchEntry.setField("mrnumber", "3537908");
-
-        List<BibEntry> fetchedEntries = fetcher.performSearch(searchEntry);
-        assertEquals(Collections.singletonList(ratiuEntry), fetchedEntries);
+        assertFalse(fetchedEntries.isEmpty());
+        assertEquals(ratiuEntry, fetchedEntries.get(0));
     }
 
     @Test

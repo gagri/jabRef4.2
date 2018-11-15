@@ -10,9 +10,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+
 public class WrapFileLinksTest {
 
     private WrapFileLinks formatter;
+
 
     @BeforeEach
     public void setUp() {
@@ -32,6 +34,7 @@ public class WrapFileLinksTest {
 
     public void testNoFormatSetNonEmptyString() {
         assertThrows(NullPointerException.class, () -> formatter.format("test.pdf"));
+
     }
 
     @Test

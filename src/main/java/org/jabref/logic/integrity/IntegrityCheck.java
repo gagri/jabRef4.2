@@ -9,23 +9,23 @@ import org.jabref.logic.journals.JournalAbbreviationRepository;
 import org.jabref.model.database.BibDatabaseContext;
 import org.jabref.model.entry.BibEntry;
 import org.jabref.model.entry.FieldName;
-import org.jabref.model.metadata.FilePreferences;
+import org.jabref.model.metadata.FileDirectoryPreferences;
 
 public class IntegrityCheck {
 
     private final BibDatabaseContext bibDatabaseContext;
-    private final FilePreferences filePreferences;
+    private final FileDirectoryPreferences fileDirectoryPreferences;
     private final BibtexKeyPatternPreferences bibtexKeyPatternPreferences;
     private final JournalAbbreviationRepository journalAbbreviationRepository;
     private final boolean enforceLegalKey;
 
     public IntegrityCheck(BibDatabaseContext bibDatabaseContext,
-                          FilePreferences filePreferences,
+                          FileDirectoryPreferences fileDirectoryPreferences,
                           BibtexKeyPatternPreferences bibtexKeyPatternPreferences,
                           JournalAbbreviationRepository journalAbbreviationRepository,
                           boolean enforceLegalKey) {
         this.bibDatabaseContext = Objects.requireNonNull(bibDatabaseContext);
-        this.filePreferences = Objects.requireNonNull(filePreferences);
+        this.fileDirectoryPreferences = Objects.requireNonNull(fileDirectoryPreferences);
         this.bibtexKeyPatternPreferences = Objects.requireNonNull(bibtexKeyPatternPreferences);
         this.journalAbbreviationRepository = Objects.requireNonNull(journalAbbreviationRepository);
         this.enforceLegalKey = enforceLegalKey;
@@ -48,7 +48,7 @@ public class IntegrityCheck {
             return result;
         }
 
-        FieldCheckers fieldCheckers = new FieldCheckers(bibDatabaseContext, filePreferences, journalAbbreviationRepository, enforceLegalKey);
+        FieldCheckers fieldCheckers = new FieldCheckers(bibDatabaseContext, fileDirectoryPreferences, journalAbbreviationRepository, enforceLegalKey);
         for (FieldChecker checker : fieldCheckers.getAll()) {
             result.addAll(checker.check(entry));
         }

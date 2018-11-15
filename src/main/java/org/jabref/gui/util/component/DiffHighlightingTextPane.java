@@ -1,8 +1,10 @@
 package org.jabref.gui.util.component;
 
-import javafx.scene.text.TextFlow;
+import javax.swing.JTextPane;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 
-public class DiffHighlightingTextPane extends TextFlow {
+public class DiffHighlightingTextPane extends JTextPane {
 
     private static final String BODY_STYLE = "body{font:sans-serif}";
     private static final String ADDITION_STYLE = ".add{color:blue;text-decoration:underline}";
@@ -14,13 +16,13 @@ public class DiffHighlightingTextPane extends TextFlow {
 
     public DiffHighlightingTextPane() {
         super();
-//        setContentType(CONTENT_TYPE);
-//        StyleSheet sheet = ((HTMLEditorKit) getEditorKit()).getStyleSheet();
-//        sheet.addRule(BODY_STYLE);
-//        sheet.addRule(ADDITION_STYLE);
-//        sheet.addRule(REMOVAL_STYLE);
-//        sheet.addRule(CHANGE_STYLE);
-//        setEditable(false);
+        setContentType(CONTENT_TYPE);
+        StyleSheet sheet = ((HTMLEditorKit) getEditorKit()).getStyleSheet();
+        sheet.addRule(BODY_STYLE);
+        sheet.addRule(ADDITION_STYLE);
+        sheet.addRule(REMOVAL_STYLE);
+        sheet.addRule(CHANGE_STYLE);
+        setEditable(false);
     }
 
 }

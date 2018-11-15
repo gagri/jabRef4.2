@@ -2,7 +2,6 @@ package org.jabref.logic.net;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -90,14 +88,13 @@ public class URLDownload {
      * We will fix this issue by accepting all (!) certificates. This is ugly; but as JabRef does not rely on
      * security-relevant information this is kind of OK (no, actually it is not...).
      *
-     * Taken from http://stackoverflow.com/a/6055903/873661 and https://stackoverflow.com/a/19542614/873661
+     * Taken from http://stackoverflow.com/a/6055903/873661
      */
     public static void bypassSSLVerification() {
         LOGGER.warn("Fix SSL exceptions by accepting ALL certificates");
 
         // Create a trust manager that does not validate certificate chains
         TrustManager[] trustAllCerts = {new X509TrustManager() {
-
             @Override
             public void checkClientTrusted(X509Certificate[] chain, String authType) {
             }
@@ -112,15 +109,11 @@ public class URLDownload {
             }
         }};
 
+        // Install the all-trusting trust manager
         try {
-            // Install all-trusting trust manager
             SSLContext context = SSLContext.getInstance("TLS");
             context.init(null, trustAllCerts, new SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
-
-            // Install all-trusting host verifier
-            HostnameVerifier allHostsValid = (hostname, session) -> true;
-            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
         } catch (Exception e) {
             LOGGER.error("A problem occurred when bypassing SSL verification", e);
         }
@@ -251,14 +244,8 @@ public class URLDownload {
      * Takes the web resource as the source for a monitored input stream.
      */
     public ProgressInputStream asInputStream() throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) this.openConnection();
-
-        if ((urlConnection.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) || (urlConnection.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST))
-        {
-            LOGGER.error("Response message {} returned for url {}", urlConnection.getResponseMessage(), urlConnection.getURL());
-            return new ProgressInputStream(new ByteArrayInputStream(new byte[0]), 0);
-        }
-        long fileSize = urlConnection.getContentLengthLong();
+        URLConnection urlConnection = this.openConnection();
+        long fileSize = urlConnection.getContentLength();
         return new ProgressInputStream(new BufferedInputStream(urlConnection.getInputStream()), fileSize);
     }
 
@@ -319,8 +306,8 @@ public class URLDownload {
             int status = ((HttpURLConnection) connection).getResponseCode();
             if (status != HttpURLConnection.HTTP_OK) {
                 if ((status == HttpURLConnection.HTTP_MOVED_TEMP)
-                    || (status == HttpURLConnection.HTTP_MOVED_PERM)
-                    || (status == HttpURLConnection.HTTP_SEE_OTHER)) {
+                        || (status == HttpURLConnection.HTTP_MOVED_PERM)
+                        || (status == HttpURLConnection.HTTP_SEE_OTHER)) {
                     // get redirect url from "location" header field
                     String newUrl = connection.getHeaderField("Location");
                     // open the new connnection again

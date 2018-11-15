@@ -25,8 +25,8 @@ public class TitleFetcher implements IdBasedFetcher {
     }
 
     @Override
-    public Optional<HelpFile> getHelpPage() {
-        return Optional.of(HelpFile.FETCHER_TITLE);
+    public HelpFile getHelpPage() {
+        return HelpFile.FETCHER_TITLE;
     }
 
     @Override

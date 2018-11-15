@@ -136,7 +136,7 @@ public class AstrophysicsDataSystemTest {
 
     @Test
     public void testHelpPage() {
-        assertEquals("ADS", fetcher.getHelpPage().get().getPageName());
+        assertEquals("ADS", fetcher.getHelpPage().getPageName());
     }
 
     @Test
@@ -176,7 +176,8 @@ public class AstrophysicsDataSystemTest {
 
     @Test
     public void testPerformSearchByIdInvalidDoi() throws Exception {
-        assertEquals(Optional.empty(), fetcher.performSearchById("this.doi.will.fail"));
+        Optional<BibEntry> fetchedEntry = fetcher.performSearchById("this.doi.will.fail");
+        assertEquals(Optional.empty(), fetchedEntry);
     }
 
     @Test

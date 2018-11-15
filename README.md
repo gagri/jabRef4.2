@@ -101,7 +101,9 @@ When you want to develop, it is necessary to generate additional sources using `
 and then generate the Eclipse `gradlew eclipse`.
 For IntelliJ IDEA, just import the project via a Gradle Import by pointing at the `build.gradle`.
 
-`gradlew test` executes all tests. We use [Travis CI](https://travis-ci.org/) for executing the tests after each commit. For developing, it is sufficient to locally only run the associated test for the classes you changed. Travis will report any other failure.
+`gradlew test` executes the normal unit tests.
+If you want to test the UI, execute `gradlew integrationTest`.
+Sources for the integration test are kept in `src/integrationTest`.
 
 
 ## Acknowledgements

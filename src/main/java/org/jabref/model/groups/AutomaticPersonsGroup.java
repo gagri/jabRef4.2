@@ -21,12 +21,8 @@ public class AutomaticPersonsGroup extends AutomaticGroup {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         AutomaticPersonsGroup that = (AutomaticPersonsGroup) o;
         return Objects.equals(field, that.field);
     }

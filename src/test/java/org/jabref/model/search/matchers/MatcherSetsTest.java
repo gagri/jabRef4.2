@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
 public class MatcherSetsTest {
 
     @Test
@@ -45,4 +46,5 @@ public class MatcherSetsTest {
         NotMatcher matcher = new NotMatcher(new MockSearchMatcher(false));
         assertTrue(matcher.isMatch(new BibEntry()));
     }
+
 }

@@ -13,6 +13,7 @@ import org.jabref.Globals;
 import org.jabref.gui.BasePanel;
 import org.jabref.gui.DialogService;
 import org.jabref.gui.FXDialogService;
+import org.jabref.gui.entryeditor.EntryEditorTabList;
 import org.jabref.gui.importer.actions.GUIPostOpenAction;
 import org.jabref.gui.undo.NamedCompound;
 import org.jabref.gui.undo.UndoableFieldChange;
@@ -25,7 +26,7 @@ import org.jabref.model.FieldChange;
 import org.jabref.model.database.BibDatabase;
 import org.jabref.model.entry.BibEntry;
 import org.jabref.model.entry.FieldName;
-import org.jabref.model.metadata.FilePreferences;
+import org.jabref.model.metadata.FileDirectoryPreferences;
 import org.jabref.preferences.JabRefPreferences;
 
 import com.jgoodies.forms.builder.FormBuilder;
@@ -87,9 +88,9 @@ public class FileLinksUpgradeWarning implements GUIPostOpenAction {
         // Only offer to upgrade links if the pdf/ps fields are used:
         offerChangeDatabase = linksFound(pr.getDatabase(), FileLinksUpgradeWarning.FIELDS_TO_LOOK_FOR);
         // If the "file" directory is not set, offer to migrate pdf/ps dir:
-        offerSetFileDir = !Globals.prefs.hasKey(FieldName.FILE + FilePreferences.DIR_SUFFIX)
-                && (Globals.prefs.hasKey(FieldName.PDF + FilePreferences.DIR_SUFFIX)
-                || Globals.prefs.hasKey(FieldName.PS + FilePreferences.DIR_SUFFIX));
+        offerSetFileDir = !Globals.prefs.hasKey(FieldName.FILE + FileDirectoryPreferences.DIR_SUFFIX)
+                && (Globals.prefs.hasKey(FieldName.PDF + FileDirectoryPreferences.DIR_SUFFIX)
+                || Globals.prefs.hasKey(FieldName.PS + FileDirectoryPreferences.DIR_SUFFIX));
 
         // First check if this warning is disabled:
         return Globals.prefs.getBoolean(JabRefPreferences.SHOW_FILE_LINKS_UPGRADE_WARNING)
@@ -141,10 +142,10 @@ public class FileLinksUpgradeWarning implements GUIPostOpenAction {
             formBuilder.add(changeDatabase).xy(1, row);
         }
         if (offerSetFileDir) {
-            if (Globals.prefs.hasKey(FieldName.PDF + FilePreferences.DIR_SUFFIX)) {
-                fileDir.setText(Globals.prefs.get(FieldName.PDF + FilePreferences.DIR_SUFFIX));
+            if (Globals.prefs.hasKey(FieldName.PDF + FileDirectoryPreferences.DIR_SUFFIX)) {
+                fileDir.setText(Globals.prefs.get(FieldName.PDF + FileDirectoryPreferences.DIR_SUFFIX));
             } else {
-                fileDir.setText(Globals.prefs.get(FieldName.PS + FilePreferences.DIR_SUFFIX));
+                fileDir.setText(Globals.prefs.get(FieldName.PS + FileDirectoryPreferences.DIR_SUFFIX));
             }
             JPanel builderPanel = new JPanel();
             builderPanel.add(setFileDir);
@@ -168,7 +169,7 @@ public class FileLinksUpgradeWarning implements GUIPostOpenAction {
 
         message.add(formBuilder.build());
 
-        int answer = JOptionPane.showConfirmDialog(null,
+        int answer = JOptionPane.showConfirmDialog(panel.frame(),
                 message, Localization.lang("Upgrade file"), JOptionPane.YES_NO_OPTION);
         if (doNotShowDialog.isSelected()) {
             Globals.prefs.putBoolean(JabRefPreferences.SHOW_FILE_LINKS_UPGRADE_WARNING, false);
@@ -220,7 +221,7 @@ public class FileLinksUpgradeWarning implements GUIPostOpenAction {
         }
 
         if (fileDir != null) {
-            Globals.prefs.put(FieldName.FILE + FilePreferences.DIR_SUFFIX, fileDir);
+            Globals.prefs.put(FieldName.FILE + FileDirectoryPreferences.DIR_SUFFIX, fileDir);
         }
 
         if (upgradePrefs) {
@@ -244,13 +245,17 @@ public class FileLinksUpgradeWarning implements GUIPostOpenAction {
     }
 
     private boolean showsFileInGenFields() {
-        for (List<String> fields : Globals.prefs.getEntryEditorTabList().values()) {
+        boolean found = false;
+        EntryEditorTabList tabList = Globals.prefs.getEntryEditorTabList();
+        outer: for (int i = 0; i < tabList.getTabCount(); i++) {
+            List<String> fields = tabList.getTabFields(i);
             for (String field : fields) {
                 if (field.equals(FieldName.FILE)) {
-                    return true;
+                    found = true;
+                    break outer;
                 }
             }
         }
-        return false;
+        return found;
     }
 }

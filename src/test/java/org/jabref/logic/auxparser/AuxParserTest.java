@@ -22,26 +22,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-class AuxParserTest {
+public class AuxParserTest {
     private ImportFormatPreferences importFormatPreferences;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         importFormatPreferences = mock(ImportFormatPreferences.class, Answers.RETURNS_DEEP_STUBS);
     }
 
     @AfterEach
-    void tearDown() {
+    public void tearDown() {
         importFormatPreferences = null;
     }
 
     @Test
-    void testNormal() throws URISyntaxException, IOException {
+    public void testNormal() throws URISyntaxException, IOException {
         InputStream originalStream = AuxParserTest.class.getResourceAsStream("origin.bib");
         Path auxFile = Paths.get(AuxParserTest.class.getResource("paper.aux").toURI());
         try (InputStreamReader originalReader = new InputStreamReader(originalStream, StandardCharsets.UTF_8)) {
@@ -63,7 +63,7 @@ class AuxParserTest {
     }
 
     @Test
-    void testNotAllFound() throws URISyntaxException, IOException {
+    public void testNotAllFound() throws URISyntaxException, IOException {
         InputStream originalStream = AuxParserTest.class.getResourceAsStream("origin.bib");
         Path auxFile = Paths.get(AuxParserTest.class.getResource("badpaper.aux").toURI());
         try (InputStreamReader originalReader = new InputStreamReader(originalStream, StandardCharsets.UTF_8)) {
@@ -85,7 +85,7 @@ class AuxParserTest {
     }
 
     @Test
-    void duplicateBibDatabaseConfiguration() throws URISyntaxException, IOException {
+    public void duplicateBibDatabaseConfiguration() throws URISyntaxException, IOException {
         InputStream originalStream = AuxParserTest.class.getResourceAsStream("config.bib");
         Path auxFile = Paths.get(AuxParserTest.class.getResource("paper.aux").toURI());
         try (InputStreamReader originalReader = new InputStreamReader(originalStream, StandardCharsets.UTF_8)) {
@@ -101,7 +101,7 @@ class AuxParserTest {
     }
 
     @Test
-    void testNestedAux() throws URISyntaxException, IOException {
+    public void testNestedAux() throws URISyntaxException, IOException {
         InputStream originalStream = AuxParserTest.class.getResourceAsStream("origin.bib");
         Path auxFile = Paths.get(AuxParserTest.class.getResource("nested.aux").toURI());
         try (InputStreamReader originalReader = new InputStreamReader(originalStream, StandardCharsets.UTF_8)) {
@@ -123,7 +123,7 @@ class AuxParserTest {
     }
 
     @Test
-    void testCrossRef() throws URISyntaxException, IOException {
+    public void testCrossRef() throws URISyntaxException, IOException {
         InputStream originalStream = AuxParserTest.class.getResourceAsStream("origin.bib");
         Path auxFile = Paths.get(AuxParserTest.class.getResource("crossref.aux").toURI());
         try (InputStreamReader originalReader = new InputStreamReader(originalStream, StandardCharsets.UTF_8)) {
@@ -145,7 +145,7 @@ class AuxParserTest {
     }
 
     @Test
-    void testFileNotFound() {
+    public void testFileNotFound() {
         AuxParser auxParser = new DefaultAuxParser(new BibDatabase());
         AuxParserResult auxResult = auxParser.parse(Paths.get("unknownfile.aux"));
 

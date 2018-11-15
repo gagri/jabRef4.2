@@ -47,4 +47,5 @@ public class AbbreviationTest {
         Abbreviation abbreviation = new Abbreviation(" Long Name ", " L N ");
         assertEquals(abbreviation.getIsoAbbreviation(), abbreviation.getMedlineAbbreviation());
     }
+
 }

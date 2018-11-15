@@ -27,4 +27,5 @@ public class UnitsToLatexFormatterTest {
     public void formatExample() {
         assertEquals("1~{Hz}", formatter.format(formatter.getExampleInput()));
     }
+
 }
